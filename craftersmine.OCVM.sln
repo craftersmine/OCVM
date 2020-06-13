@@ -15,6 +15,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{ADDAC3A2-58C7-4F90-96A9-71092AF982D1}"
 	ProjectSection(SolutionItems) = preProject
 		craftersmine.OCVM.Resources\lua\component.lua = craftersmine.OCVM.Resources\lua\component.lua
+		craftersmine.OCVM.Resources\lua\machine.lua = craftersmine.OCVM.Resources\lua\machine.lua
 	EndProjectSection
 EndProject
 Global
