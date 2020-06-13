@@ -30,7 +30,75 @@ function component.list(filter, exact)
 end
 
 function component.proxy(address)
+	local type, reason = component.type(address);
+	if not type then
+		return nil, reason;
+	end
+
+	local slot, reason = component.slot(address);
+	if not slot then
+		return nil, reason;
+	end
+
+	local proxy = { address = address, type = type, slot = slot, fields = {} }
+
+	local methods, reason = component.methods(address);
+	if not methods then
+		return nil, reason;
+	end
+
+	for method, info in pairs(methods) do
+		proxy[method] = setmetatable({ address = address, name = method }, {
+			__call = function(self, ...)
+				return component.invoke(self.address, self.name, ...);
+			end,
+
+			__tostring = function()
+				return component.doc(self.address, self.name) or "function";
+			end
+		});
+	end
+
+
+	--local fields, reason = component.fields(address);
+	--for field, info in pairs(fields) do
+	--	proxy.fields[method] = info;
+	--end
 	
+	setmetatable(proxy, 
+	{
+		__index = function (self, key)
+			if self.fields[key] and self.fields[key].getter then
+				return component.invoke(self.address, key);
+			end
+		end,
+
+		__newindex = function(self, key, value)
+			if self.fields[key] and self.fields[key].setter then
+				component.invoke(self.address, key, value);
+			elseif self.fields[key] and self.fields[key].getter then
+				error("field is read-only");
+			else
+			rawset(self, key, value);
+			end
+		end,
+
+		__pairs = function (self)
+			local keyProxy, keyField, value;
+			return function ()
+				if not keyField then
+					repeat
+						keyProxy, value = next(self, keyProxy);
+					until not keyProxy or keyProxy ~= "fields";
+				end
+				if not keyProxy then
+					keyField, value = next(self.fields, keyField);
+				end
+				return keyProxy or keyField, value;
+			end
+		end
+	});
+	return proxy;
 end
 
 function component.type(address)
@@ -46,7 +114,9 @@ function component.slot(address)
 end
 
 function component.methods(address)
-	
+	if address == nil then address = '' end;
+	local _methods = Component.methods(address);
+	return _methods;
 end
 
 function component.fields(address)
