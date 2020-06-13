@@ -10,6 +10,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
     public sealed class DeviceBus
     {
         private readonly Dictionary<string, IComponent> components = new Dictionary<string, IComponent>();
+        private int lastSlot = 0;
 
         public int MaxBusLanes { get; private set; }
 
@@ -35,6 +36,8 @@ namespace craftersmine.OCVM.Core.MachineComponents
                         component.IsPrimary = false;
                     else component.IsPrimary = true;
                     components.Add(component.Address, component);
+                    component.Slot = lastSlot;
+                    lastSlot++;
                 }
             }
             else throw new ExcededBusLanesException("Max bus lanes on device bus is excedeed " + MaxBusLanes);
