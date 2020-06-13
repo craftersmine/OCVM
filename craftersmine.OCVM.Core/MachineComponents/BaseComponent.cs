@@ -10,6 +10,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
     {
         public string Address { get; set; }
         public bool IsPrimary { get; set; }
+        public int Slot { get; set; }
 
         public BaseComponent()
         {
