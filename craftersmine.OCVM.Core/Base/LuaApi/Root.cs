@@ -29,5 +29,10 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
                 }
             }
         }
+
+        public static void breakpoint(object data)
+        {
+            print("OCVM_INTERNAL_LUA_BREAKPOINT_HIT: " + data);
+        }
     }
 }
