@@ -1,6 +1,8 @@
-﻿using System;
+﻿using craftersmine.OCVM.Core.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,6 +23,32 @@ namespace craftersmine.OCVM.Core.MachineComponents
         {
             if (address != string.Empty)
                 Address = address;
+        }
+
+        public Dictionary<string, bool> GetDeviceMethods()
+        {
+            Dictionary<string, bool> methods = new Dictionary<string, bool>();
+
+            var methodsReflect = this.GetType().GetMethods().Where(m => m.GetCustomAttributes(typeof(LuaCallbackAttribute), false).Length > 0).ToArray();
+            foreach(var m in methodsReflect)
+            {
+                string methodName = m.Name.Substring(0,1).ToLower() + m.Name.Substring(1);
+                methods.Add(methodName, m.GetCustomAttribute<LuaCallbackAttribute>().IsDirect);
+            }
+
+            return methods;
+        }
+
+        public string GetDeviceMethodDoc(string method)
+        {
+            var m = this.GetType().GetMethod(method);
+            if (m != null)
+            {
+                var attribute = m.GetCustomAttribute<LuaCallbackAttribute>();
+                if (attribute != null)
+                    return attribute.Doc;
+            }
+            return "";
         }
     }
 
