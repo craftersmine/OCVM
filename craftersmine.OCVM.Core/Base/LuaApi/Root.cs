@@ -16,8 +16,13 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             for (int i = 0; i < data.Length; i++)
             {
                 if (i == 0)
-                    combined = data[i].ToString();
-                else {
+                {
+                    if (data[i] == null)
+                        combined = "nil";
+                    else combined = data[i].ToString();
+                }
+                else 
+                {
                     if (data[i] == null)
                         combined += "\t" + "nil";
                     else combined += "\t" + data[i].ToString();
