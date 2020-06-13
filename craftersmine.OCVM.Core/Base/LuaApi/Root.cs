@@ -9,15 +9,28 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
     public sealed class Root
     {
         private static int displayCursorY = 0;
-        public static void print(object data)
+        public static void print(params object[] data)
         {
-            if (data == null)
+            string combined = "";
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                if (i == 0)
+                    combined = data[i].ToString();
+                else {
+                    if (data[i] == null)
+                        combined += "\t" + "nil";
+                    else combined += "\t" + data[i].ToString();
+                }
+            }
+
+            if (combined == null)
             {
                 LuaApi.InvokeDisplayOutput(new DisplayOutputEventArgs() { UseDefaultColors = true, StringValue = "nil", Position = VM.RunningVM.Display.CursorPosition });
             }
             else
             {
-                LuaApi.InvokeDisplayOutput(new DisplayOutputEventArgs() { UseDefaultColors = true, StringValue = data.ToString(), Position = VM.RunningVM.Display.CursorPosition });
+                LuaApi.InvokeDisplayOutput(new DisplayOutputEventArgs() { UseDefaultColors = true, StringValue = combined, Position = VM.RunningVM.Display.CursorPosition });
                 if (displayCursorY == VM.RunningVM.Display.DisplayHeight - 1)
                 {
                     LuaApi.InvokeDisplayScroll();
