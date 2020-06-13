@@ -71,7 +71,6 @@
   <ItemGroup>
     <Compile Include="Base\BaseColors.cs" />
     <Compile Include="Base\DisplayChar.cs" />
-    <Compile Include="Base\LuaApi\Converters.cs" />
     <Compile Include="Base\LuaApi\OCErrors.cs" />
     <Compile Include="Base\LuaApi\OpenComputers\Component.cs" />
     <Compile Include="Base\LuaApi\OpenComputers\FileSystem.cs" />
