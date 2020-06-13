@@ -79,7 +79,8 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Exceptions\ExcededBusLanesException.cs" />
-    <Compile Include="Extentions\StringExtentions.cs" />
+    <Compile Include="Extensions\LuaTableExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="MachineComponents\BaseComponent.cs" />
     <Compile Include="MachineComponents\DeviceBus.cs" />
     <Compile Include="MachineComponents\EEPROM.cs" />

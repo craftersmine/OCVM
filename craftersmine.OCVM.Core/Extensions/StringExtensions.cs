@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace craftersmine.OCVM.Core.Extentions
+namespace craftersmine.OCVM.Core.Extensions
 {
-    public static class StringExtentions
+    public static class StringExtensions
     {
         public static bool IsNullEmptyOrWhitespace(this string str)
         {
