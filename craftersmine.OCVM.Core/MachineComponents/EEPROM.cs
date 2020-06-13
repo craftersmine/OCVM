@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using craftersmine.OCVM.Core.Base.LuaApi;
+using craftersmine.OCVM.Core.Attributes;
 
 namespace craftersmine.OCVM.Core.MachineComponents
 {
@@ -39,6 +40,18 @@ namespace craftersmine.OCVM.Core.MachineComponents
         public string TestInvokation(string data)
         {
             return "Method Invoked and returned data! " + data;
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public static bool directMethod()
+        {
+            return true;
+        }
+
+        [LuaCallback(IsDirect = false, Doc = "non direct method, just test method")]
+        public static bool nonDirectMethod()
+        {
+            return false;
         }
     }
 }
