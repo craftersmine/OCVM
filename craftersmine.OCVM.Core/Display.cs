@@ -18,6 +18,9 @@ namespace craftersmine.OCVM.Core
         private TimeSpan lastCursorTime;
         private readonly System.Diagnostics.Stopwatch frameTimeCounter = new System.Diagnostics.Stopwatch();
 
+        public event EventHandler<DisplayRedrawnEventArgs> DisplayRedrawn;
+        private DisplayRedrawnEventArgs drea;
+
         public Tier Tier { get { return tier; } }
         public bool ShowCharactersBounds { get; set; }
         public int DisplayWidth { get; set; }
@@ -28,6 +31,7 @@ namespace craftersmine.OCVM.Core
 
         public Display()
         {
+            drea = new DisplayRedrawnEventArgs();
             CursorPosition = new Point(0, 0);
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
             DoubleBuffered = true;
@@ -64,11 +68,22 @@ namespace craftersmine.OCVM.Core
 
         public void PlaceString(int posX, int posY, string str, Color foreground, Color background)
         {
+            string remainingBuffer = "";
+            if (str.Length > DisplayWidth)
+            {
+                remainingBuffer = str.Substring(DisplayWidth);
+                str = str.Substring(0, DisplayWidth);
+            }
             for (int i = 0; i < str.Length; i++)
             {
                 screenBuffer[posX + i, posY].Character = str[i];
                 screenBuffer[posX + i, posY].ForegroundColor = foreground;
                 screenBuffer[posX + i, posY].BackgroundColor = background;
+            }
+            if (remainingBuffer != "" && remainingBuffer != null)
+            {
+                SetCursorPosition(0, posY + 1);
+                craftersmine.OCVM.Core.Base.LuaApi.Root.print(remainingBuffer);  // TODO: Fix text overlap after new line
             }
         }
 
@@ -179,7 +194,14 @@ namespace craftersmine.OCVM.Core
 
             DrawScreenBuffer();
             lastCursorTime += frameTimeCounter.Elapsed;
+            drea.DrawTime = frameTimeCounter.Elapsed;
+            DisplayRedrawn?.Invoke(this, drea);
             frameTimeCounter.Restart();
         }
+    }
+
+    public class DisplayRedrawnEventArgs : EventArgs
+    {
+        public TimeSpan DrawTime { get; set; }
     }
 }

@@ -26,7 +26,14 @@ namespace craftersmine.OCVM.GUI
             LuaApi.DisplayOutput += LuaApi_DisplayOutput;
             LuaApi.DisplayScroll += LuaApi_DisplayScroll;
             LuaApi.DisplayCursorPositionChange += LuaApi_DisplayCursorPositionChange;
+            display1.DisplayRedrawn += Display1_DisplayRedrawn;
+            display1.EnableCursor = true;
             new VM().Launch(display1);
+        }
+
+        private void Display1_DisplayRedrawn(object sender, DisplayRedrawnEventArgs e)
+        {
+            status.Text = e.DrawTime.TotalMilliseconds.ToString();
         }
 
         private void LuaApi_DisplayCursorPositionChange(object sender, DisplayCursorPositionEventArgs e)
