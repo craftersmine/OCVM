@@ -40,7 +40,9 @@ function component.type(address)
 end
 
 function component.slot(address)
-	
+	if address == nil then address = '' end;
+	local _slot = Component.slot(address);
+	return _slot[1], _slot[2];
 end
 
 function component.methods(address)
