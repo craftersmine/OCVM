@@ -19,7 +19,14 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
 
         public static string doc(string address, string method)
         {
-            return address + " : " + method + " | Doc method WIP";
+            var device = VM.RunningVM.DeviceBus.GetDevice(address);
+            
+            if (device != null)
+            {
+                return device.GetDeviceMethodDoc(method);
+            }
+
+            return "";
         }
 
         public static object invoke(string address, string method, LuaTable args)
@@ -98,6 +105,26 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
                 table[1] = null;
                 table[2] = OCErrors.NoSuchComponent;
             }
+            return table;
+        }
+
+        public static LuaTable methods(string address)
+        {
+            LuaTable table = VM.RunningVM.ExecModule.CreateTable();
+
+            var device = VM.RunningVM.DeviceBus.GetDevice(address);
+
+            if (device != null)
+            {
+                var methods = device.GetDeviceMethods();
+
+                foreach (var method in methods)
+                {
+                    table[method.Key] = method.Value;
+                }
+            }
+            else table[null] = OCErrors.NoSuchComponent;
+
             return table;
         }
     }
