@@ -14,6 +14,8 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
         public static string GetUUID(string uuid)
         {
             var dev = VM.RunningVM.DeviceBus.GetDevice(uuid);
+            if (dev == null)
+                return null;
             return dev.Address;
         }
 
