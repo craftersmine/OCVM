@@ -147,6 +147,10 @@ function component.get(address, componentType)
 	end
 end
 
+function component.isAvailable(componentType)
+	if componentType == nil then componentType = '' end;
+	return Component.isAvailable(componentType);
+end
 
 local componentProxy = {
 	__index = function (self, key)
