@@ -123,8 +123,28 @@ function component.methods(address)
 	return _methods;
 end
 
+-- due to be uncommented on official API page, dropped from VM, works as dummy
+-- just returns empty table and error if device not found
 function component.fields(address)
-	
+	if address == nil then address = '' end;
+	local data = Component.fields(address);
+	if data[1] == true then 
+		return {}, nil;
+	else
+		return nil, data[2];
+	end
+end
+
+function component.get(address, componentType)
+	if address == nil then address = ''; end;
+	if componentType == nil then componentType = ''; end;
+
+	local data = Component.get(address, componentType);
+	if data[1] == nil then
+		return nil, data[2];
+	else 
+		return data[1], nil;
+	end
 end
 
 
