@@ -13,6 +13,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
         private int lastSlot = 0;
 
         public int MaxBusLanes { get; private set; }
+        public IComponent this[string address] { get { return GetDevice(address); } }
 
         public DeviceBus(int maxBusLanes)
         {
