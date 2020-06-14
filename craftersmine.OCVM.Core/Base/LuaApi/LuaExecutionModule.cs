@@ -54,7 +54,9 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             return await Task<object[]>.Run(new Func<object[]>(() => {
                 try
                 {
-                    return env.DoString(str, chunkName);
+                    str = "local component = require('component');\r\n" + str;
+                    var code = env.LoadString(str, chunkName);
+                    return code.Call();
                 }
                 catch (Exception ex)
                 {
