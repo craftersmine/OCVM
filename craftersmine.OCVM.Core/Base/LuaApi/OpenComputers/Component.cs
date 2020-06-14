@@ -135,6 +135,103 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
             return tableMethods;
         }
 
+        public static LuaTable fields(string address)
+        {
+            LuaTable table = VM.RunningVM.ExecModule.CreateTable();
+
+            var device = VM.RunningVM.DeviceBus.GetDevice(address);
+            if (device != null)
+                table[1] = true;
+            else
+            {
+                table[1] = null;
+                table[2] = OCErrors.NoSuchComponent;
+            }
+            return table;
+        }
+
+        public static LuaTable get(string address, string componentType)
+        {
+            LuaTable table = VM.RunningVM.ExecModule.CreateTable();
+
+            if (!componentType.IsNullEmptyOrWhitespace())
+            {
+                var device = VM.RunningVM.DeviceBus.GetDevice(address);
+                if (device != null)
+                    table[1] = device.Address;
+                else
+                {
+                    table[1] = null;
+                    table[2] = OCErrors.NoSuchComponent;
+                }
+            }
+            else
+            {
+                bool isDeviceFound = false;
+                var devices = VM.RunningVM.DeviceBus.GetDevicesByType(componentType, false);
+                foreach (var dev in devices)
+                {
+                    var uuid = GetUUID(address);
+                    if (dev.Address == uuid)
+                    {
+                        isDeviceFound = true;
+                        table[1] = uuid;
+                        break;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                if (!isDeviceFound)
+                {
+                    table[1] = null;
+                    table[2] = OCErrors.NoSuchComponent;
+                }
+            }
+
+            return table;
+        }
+
+        public static bool isAvailable(string componentType)
+        {
+            var devices = VM.RunningVM.DeviceBus.GetDevicesByType(componentType, false);
+            IComponent primaryDevice = null;
+            foreach (var dev in devices)
+            {
+                if (dev.IsPrimary)
+                {
+                    primaryDevice = dev;
+                    break;
+                }
+                else continue;
+            }
+            if (primaryDevice != null)
+                return true;
+            return false;
+        }
+
+        public static LuaTable getPrimary(string componentType)
+        {
+            LuaTable table = VM.RunningVM.ExecModule.CreateTable();
+            if (isAvailable(componentType))
+            {
+                var devices = VM.RunningVM.DeviceBus.GetDevicesByType(componentType, false);
+                IComponent primaryDevice = null;
+                foreach (var dev in devices)
+                {
+                    if (dev.IsPrimary)
+                    {
+                        primaryDevice = dev;
+                        break;
+                    }
+                    else continue;
+                }
+                if (primaryDevice != null)
+                {
+
+                }
+            }
             return table;
         }
     }
