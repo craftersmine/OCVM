@@ -48,15 +48,19 @@ function component.proxy(address)
 	end
 
 	for method, info in pairs(methods) do
-		proxy[method] = setmetatable({ address = address, name = method }, {
-			__call = function(self, ...)
-				return component.invoke(self.address, self.name, ...);
-			end,
+		if not info.getter and not info.setter then
+			proxy[method] = setmetatable({ address = address, name = method }, {
+				__call = function(self, ...)
+					return component.invoke(self.address, self.name, ...);
+				end,
 
-			__tostring = function()
-				return component.doc(self.address, self.name) or "function";
-			end
-		});
+				__tostring = function()
+					return component.doc(self.address, self.name) or "function";
+				end
+			});
+		else
+			proxy.fields[method] = info;
+		end
 	end
 
 
