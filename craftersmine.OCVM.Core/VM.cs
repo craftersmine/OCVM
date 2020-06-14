@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace craftersmine.OCVM.Core
 {
@@ -21,6 +22,7 @@ namespace craftersmine.OCVM.Core
             ExecModule = new LuaExecutionModule(0);
             DeviceBus = new DeviceBus(8);
             Display = display;
+            DeviceBus.ConnectDevice(new ComputerComponent());
             if (EEPROM.LoadEEPROMFromFile("LuaBios.lua" , out EEPROM eeprom))
             {
                 eeprom.Address = Guid.Empty.ToString();
