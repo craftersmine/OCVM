@@ -7,17 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "craftersmine.OCVM.Core", "c
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "craftersmine.OCVM.GUI", "craftersmine.OCVM.GUI\craftersmine.OCVM.GUI.csproj", "{B9AD2AED-605B-43DF-A3C6-14D69E9F7B1F}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lua", "Lua", "{2F850D0D-CD7E-4750-AFDD-3EBDC40DF065}"
-	ProjectSection(SolutionItems) = preProject
-		craftersmine.OCVM.Resources\LuaBios.lua = craftersmine.OCVM.Resources\LuaBios.lua
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{ADDAC3A2-58C7-4F90-96A9-71092AF982D1}"
-	ProjectSection(SolutionItems) = preProject
-		craftersmine.OCVM.Resources\lua\component.lua = craftersmine.OCVM.Resources\lua\component.lua
-		craftersmine.OCVM.Resources\lua\machine.lua = craftersmine.OCVM.Resources\lua\machine.lua
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,9 +34,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{ADDAC3A2-58C7-4F90-96A9-71092AF982D1} = {2F850D0D-CD7E-4750-AFDD-3EBDC40DF065}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {501042D1-B5BC-4F98-9001-567EBB9EEA1D}
