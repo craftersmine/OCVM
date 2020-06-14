@@ -88,6 +88,7 @@
     <Compile Include="Extensions\LuaTableExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="MachineComponents\BaseComponent.cs" />
+    <Compile Include="MachineComponents\Computer.cs" />
     <Compile Include="MachineComponents\DeviceBus.cs" />
     <Compile Include="MachineComponents\EEPROM.cs" />
     <Compile Include="MachineComponents\IComponent.cs" />
