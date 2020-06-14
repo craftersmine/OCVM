@@ -37,21 +37,10 @@ namespace craftersmine.OCVM.Core.MachineComponents
             return LoadEEPROM(File.ReadAllText(eepromCodeFile), out eeprom);
         }
 
-        public string TestInvokation(string data)
+        [LuaCallback(IsDirect = true, Doc = "")]
+        public string get()
         {
-            return "Method Invoked and returned data! " + data;
-        }
-
-        [LuaCallback(IsDirect = true)]
-        public static bool directMethod()
-        {
-            return true;
-        }
-
-        [LuaCallback(IsDirect = false, Doc = "non direct method, just test method")]
-        public static bool nonDirectMethod()
-        {
-            return false;
+            return EEPROMCode;
         }
     }
 }
