@@ -73,6 +73,7 @@
     <Compile Include="Base\DisplayChar.cs" />
     <Compile Include="Base\LuaApi\OCErrors.cs" />
     <Compile Include="Base\LuaApi\OpenComputers\Component.cs" />
+    <Compile Include="Base\LuaApi\OpenComputers\Computer.cs" />
     <Compile Include="Base\LuaApi\OpenComputers\FileSystem.cs" />
     <Compile Include="Base\LuaApi\LuaApi.cs" />
     <Compile Include="Base\LuaApi\Root.cs" />
