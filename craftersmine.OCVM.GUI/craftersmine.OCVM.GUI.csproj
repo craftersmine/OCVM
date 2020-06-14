@@ -128,6 +128,9 @@
       <Link>lua\machine.lua</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="..\craftersmine.OCVM.Resources\lua\stdlib.lua">
+      <Link>lua\stdlib.lua</Link>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
