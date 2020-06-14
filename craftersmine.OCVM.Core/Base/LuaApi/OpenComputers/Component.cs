@@ -112,20 +112,28 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
 
         public static LuaTable methods(string address)
         {
-            LuaTable table = VM.RunningVM.ExecModule.CreateTable();
+            LuaTable tableMethods = VM.RunningVM.ExecModule.CreateTable();
 
             var device = VM.RunningVM.DeviceBus.GetDevice(address);
 
             if (device != null)
             {
-                var methods = device.GetDeviceMethods();
+                Dictionary<string, LuaMethodInfo> methods = device.GetDeviceMethods();
 
                 foreach (var method in methods)
                 {
-                    table[method.Key] = method.Value;
+                    LuaTable methodInfo = VM.RunningVM.ExecModule.CreateTable();
+                    methodInfo["direct"] = method.Value.IsDirect;
+                    methodInfo["setter"] = method.Value.IsSetter;
+                    methodInfo["getter"] = method.Value.IsGetter;
+                    methodInfo["doc"] = method.Value.Doc;
+                    tableMethods[method.Key] = methodInfo;
                 }
             }
-            else table[null] = OCErrors.NoSuchComponent;
+            else tableMethods[null] = OCErrors.NoSuchComponent;
+
+            return tableMethods;
+        }
 
             return table;
         }
