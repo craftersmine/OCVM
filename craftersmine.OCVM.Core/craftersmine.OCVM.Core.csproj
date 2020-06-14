@@ -78,6 +78,7 @@
     <Compile Include="Base\LuaApi\Root.cs" />
     <Compile Include="Base\LuaApi\LuaExecutionModule.cs" />
     <Compile Include="Attributes\LuaCallbackAttribute.cs" />
+    <Compile Include="Base\LuaMethodInfo.cs" />
     <Compile Include="Base\Tier.cs" />
     <Compile Include="Display.cs">
       <SubType>UserControl</SubType>
