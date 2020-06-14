@@ -135,9 +135,9 @@ namespace craftersmine.OCVM.GUI
 
         int count = 0;
 
-        private void Configure_Click(object sender, EventArgs e)
+        private async void Configure_Click(object sender, EventArgs e)
         {
-            VM.RunningVM.ExecModule.ExecuteString(((EEPROM)VM.RunningVM.DeviceBus.GetDevice("0")).EEPROMCode);
+            await VM.RunningVM.ExecModule.ExecuteString(((EEPROM)VM.RunningVM.DeviceBus.GetDevice("00000000")).EEPROMCode);
         }
     }
 }
