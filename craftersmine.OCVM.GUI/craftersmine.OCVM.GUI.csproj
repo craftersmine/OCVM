@@ -130,6 +130,10 @@
     </None>
     <None Include="..\craftersmine.OCVM.Resources\lua\stdlib.lua">
       <Link>lua\stdlib.lua</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="lua\computer.lua">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
