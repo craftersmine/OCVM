@@ -69,6 +69,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\OpenComputersComponentAttribute.cs" />
     <Compile Include="Base\BaseColors.cs" />
     <Compile Include="Base\DisplayChar.cs" />
     <Compile Include="Base\LuaApi\OCErrors.cs" />
