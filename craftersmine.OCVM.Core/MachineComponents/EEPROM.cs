@@ -29,16 +29,16 @@ namespace craftersmine.OCVM.Core.MachineComponents
             DeviceInfo.Size = capacity.ToString();
         }
 
-        public static bool LoadEEPROM(string eepromCode, out EEPROM eeprom)
+        public static bool LoadEEPROM(string eepromCode, out EEPROM eeprom, int maxSize = 4095)
         {
-            if (eepromCode.Length > 4096)
+            if (eepromCode.Length > maxSize)
             {
                 eeprom = null;
                 return false;
             }
             else
             {
-                eeprom = new EEPROM(eepromCode);
+                eeprom = new EEPROM(eepromCode, maxSize);
                 return true;
             }
         }
