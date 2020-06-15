@@ -1,11 +1,11 @@
 ﻿using craftersmine.OCVM.Core.MachineComponents;
-using craftersmine.OCVM.Core.Base.LuaApi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using craftersmine.OCVM.Core.Base.LuaApi;
 
 namespace craftersmine.OCVM.Core
 {
@@ -22,10 +22,10 @@ namespace craftersmine.OCVM.Core
             ExecModule = new LuaExecutionModule(0);
             DeviceBus = new DeviceBus(8);
             Display = display;
-            DeviceBus.ConnectDevice(new ComputerComponent());
+            DeviceBus.ConnectDevice(new Computer(Guid.NewGuid().ToString()));
+            DeviceBus.ConnectDevice(MachineComponents.FileSystem.MountFileSystem("D:\\OCVMDrives\\c\\"));
             if (EEPROM.LoadEEPROMFromFile("LuaBios.lua" , out EEPROM eeprom))
             {
-                eeprom.Address = Guid.Empty.ToString();
                 DeviceBus.ConnectDevice(eeprom);
             }
             RunningVM = this;
