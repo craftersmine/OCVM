@@ -31,12 +31,51 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
             return "";
         }
 
-        public static object invoke(string address, string method, LuaTable args)
+        public static object invoke(string address, string method, LuaTable args, out object result1, out object result2, out object result3, out object result4, out object result5)
         {
+            result1 = null;
+            result2 = null;
+            result3 = null;
+            result4 = null;
+            result5 = null;
             object invocationResult;
-            string addr = Guid.Empty.ToString();
-            var device = VM.RunningVM.DeviceBus.GetDevice(addr);
+            var device = VM.RunningVM.DeviceBus.GetDevice(address);
             invocationResult = ((BaseComponent)device).InvokeMethod(method, args.GetValuesAsArray());
+            if (invocationResult.GetType().BaseType == typeof(Array))
+            {
+                var arr = ((Array)invocationResult);
+                switch (arr.Length)
+                {
+                    case 1:
+                        return arr.GetValue(0);
+                    case 2:
+                        result1 = arr.GetValue(1);
+                        return arr.GetValue(0);
+                    case 3:
+                        result1 = arr.GetValue(1);
+                        result2 = arr.GetValue(2);
+                        return arr.GetValue(0);
+                    case 4:
+                        result1 = arr.GetValue(1);
+                        result2 = arr.GetValue(2);
+                        result3 = arr.GetValue(3);
+                        return arr.GetValue(0);
+                    case 5:
+                        result1 = arr.GetValue(1);
+                        result2 = arr.GetValue(2);
+                        result3 = arr.GetValue(3);
+                        result4 = arr.GetValue(4);
+                        return arr.GetValue(0);
+                    case 6:
+                    default:
+                        result1 = arr.GetValue(1);
+                        result2 = arr.GetValue(2);
+                        result3 = arr.GetValue(3);
+                        result4 = arr.GetValue(4);
+                        result5 = arr.GetValue(5);
+                        return arr.GetValue(0);
+                }
+            }
             return invocationResult;
         }
 
