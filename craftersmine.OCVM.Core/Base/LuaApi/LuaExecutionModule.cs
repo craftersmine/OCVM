@@ -17,12 +17,17 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
         //private readonly Script env;
         private readonly Lua env;
 
+        public Random Random { get; private set; }
+
         public LuaExecutionModule(int maxRamAvailable)
         {
+            Random = new Random();
             env = new Lua();
+            env.UseTraceback = true;
             env.LoadCLRPackage();
             RegisterGlobals();
             RegisterModules();
+
         }
 
         private void PrintException(Exception e)
@@ -54,7 +59,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             return await Task<object[]>.Run(new Func<object[]>(() => {
                 try
                 {
-                    str = "local component = require('component');\r\n" + str;
+                    str = "local component = require('component');local computer = require('computer');\r\n" + str;
                     var code = env.LoadString(str, chunkName);
                     return code.Call();
                 }
