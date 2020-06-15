@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using craftersmine.OCVM.Core.Attributes;
 using craftersmine.OCVM.Core.Exceptions;
 
 namespace craftersmine.OCVM.Core.MachineComponents
@@ -30,8 +31,9 @@ namespace craftersmine.OCVM.Core.MachineComponents
                     bool isPrimaryAlreadyExists = false;
                     foreach (var primaryComp in GetPrimaryComponents())
                     {
-                        if (primaryComp.IsPrimary)
-                            isPrimaryAlreadyExists = true;
+                        if (primaryComp.GetDeviceTypeName() == component.GetDeviceTypeName())
+                            if (primaryComp.IsPrimary)
+                                isPrimaryAlreadyExists = true;
                     }
                     if (isPrimaryAlreadyExists)
                         component.IsPrimary = false;
@@ -87,12 +89,12 @@ namespace craftersmine.OCVM.Core.MachineComponents
                 {
                     if (exact)
                     {
-                        if (dev.GetType().Name.ToLower() == type.ToLower())
+                        if (dev.GetComponentAttribute().ComponentType.ToLower() == type.ToLower())
                             devices.Add(dev);
                     }
                     else
                     {
-                        if (dev.GetType().Name.ToLower().Contains(type))
+                        if (dev.GetComponentAttribute().ComponentType.ToLower().Contains(type))
                             devices.Add(dev);
                     }
                 }
