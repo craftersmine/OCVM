@@ -1,4 +1,5 @@
-﻿using craftersmine.OCVM.Core.Base;
+﻿using craftersmine.OCVM.Core.Attributes;
+using craftersmine.OCVM.Core.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +13,10 @@ namespace craftersmine.OCVM.Core.MachineComponents
         string Address { get; set; }
         bool IsPrimary { get; set; }
         int Slot { get; set; }
+        DeviceInfo DeviceInfo { get; set; }
 
         Dictionary<string, LuaMethodInfo> GetDeviceMethods();
         string GetDeviceMethodDoc(string method);
+        OpenComputersComponentAttribute GetComponentAttribute();
     }
 }
