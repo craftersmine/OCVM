@@ -101,5 +101,24 @@ namespace craftersmine.OCVM.Core.MachineComponents
 
             return devices.ToArray();
         }
+
+        public IComponent GetPrimaryComponent(string type)
+        {
+            foreach (var dev in components)
+            {
+                var deviceAttribute = dev.Value.GetComponentAttribute();
+                if (deviceAttribute != null)
+                {
+                    if (deviceAttribute.ComponentType.ToLower() == type.ToLower())
+                    {
+                        if (dev.Value.IsPrimary)
+                            return dev.Value;
+                    }
+                    else continue;
+                }
+                else continue;
+            }
+            return null;
+        }
     }
 }
