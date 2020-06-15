@@ -98,6 +98,7 @@
     <Compile Include="MachineComponents\IComponent.cs" />
     <Compile Include="VM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VMEvents.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
