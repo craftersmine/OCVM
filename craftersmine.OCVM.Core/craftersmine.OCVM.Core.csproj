@@ -88,6 +88,7 @@
     <Compile Include="Exceptions\ExcededBusLanesException.cs" />
     <Compile Include="Exceptions\InvalidDeviceException.cs" />
     <Compile Include="Extensions\LuaTableExtensions.cs" />
+    <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="MachineComponents\BaseComponent.cs" />
     <Compile Include="MachineComponents\Computer.cs" />
