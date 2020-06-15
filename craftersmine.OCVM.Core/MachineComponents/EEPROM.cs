@@ -9,13 +9,24 @@ using craftersmine.OCVM.Core.Attributes;
 
 namespace craftersmine.OCVM.Core.MachineComponents
 {
+    [OpenComputersComponent(ComponentType = "eeprom")]
     public sealed class EEPROM : BaseComponent
     {
         public string EEPROMCode { get; private set; }
 
-        private EEPROM(string data) : base()
+        private EEPROM() { }
+
+        private EEPROM(string data, int capacity) : base()
         {
             EEPROMCode = data;
+            if (DeviceInfo == null)
+                DeviceInfo = new DeviceInfo();
+            DeviceInfo.Class = DeviceClass.Memory;
+            DeviceInfo.Description = "EEPROM";
+            DeviceInfo.Vendor = DeviceInfo.DefaultVendor;
+            DeviceInfo.Product = "Fast-Flash 2K";
+            DeviceInfo.Capacity = capacity.ToString();
+            DeviceInfo.Size = capacity.ToString();
         }
 
         public static bool LoadEEPROM(string eepromCode, out EEPROM eeprom)
