@@ -2,6 +2,7 @@
 using craftersmine.OCVM.Core.Base;
 using craftersmine.OCVM.Core.Base.LuaApi;
 using craftersmine.OCVM.Core.MachineComponents;
+using craftersmine.OCVM.GUI.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -136,7 +137,7 @@ namespace craftersmine.OCVM.GUI
 
         int count = 0;
 
-        private async void Configure_Click(object sender, EventArgs e)
+        private void Configure_Click(object sender, EventArgs e)
         {
             VM.RunningVM.ExecModule.ExecuteString(((EEPROM)VM.RunningVM.DeviceBus.GetPrimaryComponent("eeprom")).EEPROMCode);
         }
