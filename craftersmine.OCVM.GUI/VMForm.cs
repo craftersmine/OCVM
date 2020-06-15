@@ -18,6 +18,7 @@ namespace craftersmine.OCVM.GUI
     public partial class VMForm : Form
     {
         private TimeSpan frameTime = TimeSpan.Zero;
+        private Dictionary<string, ToolStripStatusLabel> statusIcons = new Dictionary<string, ToolStripStatusLabel>();
 
         public VMForm(Tier displayTier)
         {
@@ -137,7 +138,27 @@ namespace craftersmine.OCVM.GUI
 
         private async void Configure_Click(object sender, EventArgs e)
         {
-            await VM.RunningVM.ExecModule.ExecuteString(((EEPROM)VM.RunningVM.DeviceBus.GetDevice("00000000")).EEPROMCode);
+            VM.RunningVM.ExecModule.ExecuteString(((EEPROM)VM.RunningVM.DeviceBus.GetPrimaryComponent("eeprom")).EEPROMCode);
+        }
+
+        private void aboutMenu_Click(object sender, EventArgs e)
+        {
+            CreateStatusIcon("test" + count++, Resources.configure);
+        }
+
+        public ToolStripStatusLabel CreateStatusIcon(string id, Image image)
+        {
+            ToolStripStatusLabel icon = new ToolStripStatusLabel(image);
+            icon.Name = id;
+            icon.Text = "";
+            icon.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            if (!statusIcons.ContainsKey(id))
+            {
+                statusIcons.Add(id, icon);
+                statusStrip1.Items.Add(icon);
+            }
+            else throw new Exception("Status icon exists! " + id);
+            return icon;
         }
     }
 }
