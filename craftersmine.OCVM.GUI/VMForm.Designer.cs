@@ -125,8 +125,9 @@
             // 
             this.aboutMenu.Image = global::craftersmine.OCVM.GUI.Properties.Resources.help;
             this.aboutMenu.Name = "aboutMenu";
-            this.aboutMenu.Size = new System.Drawing.Size(107, 22);
+            this.aboutMenu.Size = new System.Drawing.Size(180, 22);
             this.aboutMenu.Text = "About";
+            this.aboutMenu.Click += new System.EventHandler(this.aboutMenu_Click);
             // 
             // toolStrip1
             // 
@@ -181,17 +182,22 @@
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.status});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 308);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 306);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(508, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(508, 24);
             this.statusStrip1.TabIndex = 5;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // status
             // 
+            this.status.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Right;
+            this.status.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
+            this.status.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.status.Name = "status";
-            this.status.Size = new System.Drawing.Size(46, 17);
+            this.status.Size = new System.Drawing.Size(493, 19);
+            this.status.Spring = true;
             this.status.Text = "{status}";
+            this.status.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // display1
             // 
