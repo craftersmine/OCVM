@@ -41,39 +41,42 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
             object invocationResult;
             var device = VM.RunningVM.DeviceBus.GetDevice(address);
             invocationResult = ((BaseComponent)device).InvokeMethod(method, args.GetValuesAsArray());
-            if (invocationResult.GetType().BaseType == typeof(Array))
+            if (invocationResult != null)
             {
-                var arr = ((Array)invocationResult);
-                switch (arr.Length)
+                if (invocationResult.GetType().BaseType == typeof(Array))
                 {
-                    case 1:
-                        return arr.GetValue(0);
-                    case 2:
-                        result1 = arr.GetValue(1);
-                        return arr.GetValue(0);
-                    case 3:
-                        result1 = arr.GetValue(1);
-                        result2 = arr.GetValue(2);
-                        return arr.GetValue(0);
-                    case 4:
-                        result1 = arr.GetValue(1);
-                        result2 = arr.GetValue(2);
-                        result3 = arr.GetValue(3);
-                        return arr.GetValue(0);
-                    case 5:
-                        result1 = arr.GetValue(1);
-                        result2 = arr.GetValue(2);
-                        result3 = arr.GetValue(3);
-                        result4 = arr.GetValue(4);
-                        return arr.GetValue(0);
-                    case 6:
-                    default:
-                        result1 = arr.GetValue(1);
-                        result2 = arr.GetValue(2);
-                        result3 = arr.GetValue(3);
-                        result4 = arr.GetValue(4);
-                        result5 = arr.GetValue(5);
-                        return arr.GetValue(0);
+                    var arr = ((Array)invocationResult);
+                    switch (arr.Length)
+                    {
+                        case 1:
+                            return arr.GetValue(0);
+                        case 2:
+                            result1 = arr.GetValue(1);
+                            return arr.GetValue(0);
+                        case 3:
+                            result1 = arr.GetValue(1);
+                            result2 = arr.GetValue(2);
+                            return arr.GetValue(0);
+                        case 4:
+                            result1 = arr.GetValue(1);
+                            result2 = arr.GetValue(2);
+                            result3 = arr.GetValue(3);
+                            return arr.GetValue(0);
+                        case 5:
+                            result1 = arr.GetValue(1);
+                            result2 = arr.GetValue(2);
+                            result3 = arr.GetValue(3);
+                            result4 = arr.GetValue(4);
+                            return arr.GetValue(0);
+                        case 6:
+                        default:
+                            result1 = arr.GetValue(1);
+                            result2 = arr.GetValue(2);
+                            result3 = arr.GetValue(3);
+                            result4 = arr.GetValue(4);
+                            result5 = arr.GetValue(5);
+                            return arr.GetValue(0);
+                    }
                 }
             }
             return invocationResult;
