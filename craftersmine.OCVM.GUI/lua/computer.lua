@@ -10,4 +10,9 @@ function computer.getBootAddress()
 	return Computer.getBootAddress();
 end
 
+function computer.beep( ... )
+	
+end
+
+
 return computer;
