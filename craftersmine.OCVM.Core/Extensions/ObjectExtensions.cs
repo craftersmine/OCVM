@@ -16,5 +16,15 @@ namespace craftersmine.OCVM.Core.Extensions
             var reflectedMethods = objType.GetMethods().Where(m => m.GetCustomAttributes(typeof(LuaCallbackAttribute), false).Length > 0).ToArray();
             return reflectedMethods;
         }
+
+        public static MethodInfo GetLuaCallback(this object obj, string name)
+        {
+            Type objType = obj.GetType();
+            var reflectedMethod = objType.GetMethod(name);
+            var attr = reflectedMethod.GetCustomAttribute(typeof(LuaCallbackAttribute));
+            if (attr != null)
+                return reflectedMethod;
+            return null;
+        }
     }
 }
