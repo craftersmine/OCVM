@@ -76,9 +76,13 @@ namespace craftersmine.OCVM.Core
             }
             for (int i = 0; i < str.Length; i++)
             {
-                screenBuffer[posX + i, posY].Character = str[i];
-                screenBuffer[posX + i, posY].ForegroundColor = foreground;
-                screenBuffer[posX + i, posY].BackgroundColor = background;
+                try
+                {
+                    screenBuffer[posX + i, posY].Character = str[i];
+                    screenBuffer[posX + i, posY].ForegroundColor = foreground;
+                    screenBuffer[posX + i, posY].BackgroundColor = background;
+                }
+                catch { }
             }
             if (remainingBuffer != "" && remainingBuffer != null)
             {
