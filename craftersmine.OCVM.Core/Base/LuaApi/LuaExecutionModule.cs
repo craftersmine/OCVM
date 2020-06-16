@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using System.Reflection;
-using System.IO;
 using craftersmine.OCVM.Core.Base;
 using craftersmine.OCVM.Core.Base.LuaApi.OpenComputers;
 using NLua;
@@ -27,7 +26,6 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             env.LoadCLRPackage();
             RegisterGlobals();
             RegisterModules();
-
         }
 
         private void PrintException(Exception e)
@@ -59,7 +57,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             return await Task<object[]>.Run(new Func<object[]>(() => {
                 try
                 {
-                    str = "local component = require('component');local computer = require('computer');\r\n" + str;
+                    str = "import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.MachineComponents');local component = require('component');local computer = require('computer');\r\n" + str;
                     var code = env.LoadString(str, chunkName);
                     return code.Call();
                 }
@@ -69,6 +67,27 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
                     return null;
                 }
             }));
+        }
+
+        public LuaTable SetMetatable(LuaTable table, LuaTable metatable)
+        {
+            var setMeta = env.GetFunction("setmetatable");
+            var res = setMeta.Call(table, metatable);
+            return res[0] as LuaTable;
+        }
+
+        public LuaTable GetMetatable(LuaTable table)
+        {
+            var setMeta = env.GetFunction("getmetatable");
+            var res = setMeta.Call(table);
+            return res[0] as LuaTable;
+        }
+
+        public LuaFunction CreateLuaFunction(string name, string body)
+        {
+            string func = name + " = function(...) " + body + " end; return " + name;
+            var fnc = env.DoString(func)[0];
+            return (LuaFunction)fnc;
         }
 
         public void RegisterGlobals()
