@@ -49,12 +49,16 @@ namespace craftersmine.OCVM.Core.Extensions
 
         public static object[] GetKeysAsArray(this LuaTable table)
         {
-            return table.GetKeysAsList().ToArray();
+            if (table != null)
+                return table.GetKeysAsList().ToArray();
+            else return null;
         }
 
         public static object[] GetValuesAsArray(this LuaTable table)
         {
-            return table.GetValuesAsList().ToArray();
+            if (table != null)
+                return table.GetValuesAsList().ToArray();
+            else return null;
         }
     }
 }
