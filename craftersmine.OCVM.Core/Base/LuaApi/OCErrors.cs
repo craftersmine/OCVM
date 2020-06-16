@@ -11,5 +11,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
         public static readonly string NoSuchComponent = "no such component";
         public static readonly string FileNotFound = "file not found";
         public static readonly string BadFileDescriptor = "bad file descriptor";
+        public static readonly string UnsupportedMode = "unsupported mode";
+        public static readonly string PermissionDenied = "access denied";
     }
 }
