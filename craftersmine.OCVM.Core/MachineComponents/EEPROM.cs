@@ -13,6 +13,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
     public sealed class EEPROM : BaseComponent
     {
         public string EEPROMCode { get; private set; }
+        public string TempData { get; private set; }
 
         private EEPROM() { }
 
@@ -49,9 +50,27 @@ namespace craftersmine.OCVM.Core.MachineComponents
         }
 
         [LuaCallback(IsDirect = true, Doc = "")]
-        public string get()
+        public object[] get()
         {
-            return EEPROMCode;
+            return new object[] { EEPROMCode };
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public void set()
+        { 
+            
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public object[] getData()
+        {
+            return new object[] { TempData };
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public void setData(string data)
+        {
+            TempData = data;
         }
     }
 }
