@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 using System.IO;
 using NLua;
 using craftersmine.OCVM.Core.Base.LuaApi;
-using System.Reflection.Emit;
+using craftersmine.OCVM.Core.Extensions;
+using System.Security;
 
 namespace craftersmine.OCVM.Core.MachineComponents
 {
@@ -69,7 +70,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
             fs.RestoreFileSystem();
             return fs;
         }
-        
+
         public string GetPath(string ocPath)
         {
             if (ocPath.StartsWith("/"))
@@ -84,23 +85,54 @@ namespace craftersmine.OCVM.Core.MachineComponents
             return File.Exists(GetPath(ocPath));
         }
 
+        public void CloseHandle(FileSystemHandle handle)
+        {
+            if (handles.ContainsKey(handle.HandleId))
+            {
+                handle.IsClosed = true;
+                handles.Remove(handle.HandleId);
+            }
+        }
+
+        public FileSystemHandleMode ParseMode(string mode)
+        {
+            if (!mode.IsNullEmptyOrWhitespace())
+            {
+                mode = mode.ToLower();
+                if ((mode == "r") || mode == "rb")
+                    return FileSystemHandleMode.Read;
+                if ((mode == "w") || mode == "wb")
+                    return FileSystemHandleMode.Write;
+                if ((mode == "a") || mode == "ab")
+                    return FileSystemHandleMode.Append;
+                else return FileSystemHandleMode.Unsupported;
+            }
+            else return FileSystemHandleMode.Read;
+        }
+
         #region Lua Callbacks
-        
+
         [LuaCallback(IsDirect = true)]
         public object[] open(string path, string mode)
         {
             object[] result = new object[2];
+            var m = ParseMode(mode);
+            if (m == FileSystemHandleMode.Unsupported)
+            {
+                result[0] = null;
+                result[1] = OCErrors.UnsupportedMode;
+                return result;
+            }
 
             if (IsFileExists(path))
             {
                 LuaTable h = VM.RunningVM.ExecModule.CreateTable();
-                LuaTable fs = VM.RunningVM.ExecModule.CreateTable();
-                FileSystemHandle fsHandle = new FileSystemHandle();
+                FileSystemHandle fsHandle = new FileSystemHandle(GetPath(path), m);
+                fsHandle.ParentFS = this;
                 handles.Add(fsHandle.HandleId, fsHandle);
 
-                h["handle"] = fsHandle.HandleId;
-
-                result[0] = h;
+                result[0] = fsHandle;
+                VMEvents.OnDiskActivity(this.Address, DiskActivityType.Read);
             }
             else
             {
@@ -111,13 +143,20 @@ namespace craftersmine.OCVM.Core.MachineComponents
             return result;
         }
 
-        public void close(int handle)
+        [LuaCallback(IsDirect = true)]
+        public object[] read(FileSystemHandle handle, double length)
         {
-            if (handles.ContainsKey(handle))
-            {
-                handles[handle].IsClosed = true;
-                handles.Remove(handle);
-            }
+            if (handle == null)
+                return new object[] { null, OCErrors.BadFileDescriptor };
+            return handle.read((int)length);
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public object[] write(FileSystemHandle handle, string data)
+        {
+            if (handle == null)
+                return new object[] { null, OCErrors.BadFileDescriptor };
+            return handle.write(data);
         }
 
         #endregion
@@ -125,13 +164,140 @@ namespace craftersmine.OCVM.Core.MachineComponents
 
     public sealed class FileSystemHandle
     {
-        public int HandleId { get; set; }
-        public string HostFilePath { get; set; }
-        public FileSystem ParentFS { get; set; }
-        public bool IsClosed { get; set; }
-        public FileSystemHandle()
+        internal int HandleId { get; set; }
+        public int handle { get { return HandleId; } }
+        internal FileSystemHandleMode Mode { get; set; }
+        internal string HostFilePath { get; set; }
+        internal FileStream FileStream { get; set; }
+        internal FileSystem ParentFS { get; set; }
+        internal bool IsClosed { get; set; }
+
+        internal FileSystemHandle(string hostFilepath, FileSystemHandleMode mode)
         {
+            HostFilePath = hostFilepath;
+            Mode = mode;
             HandleId = new Random().Next(100000000, int.MaxValue);
+            FileStream = new FileStream(HostFilePath, FileMode.OpenOrCreate, (FileAccess)Mode);
         }
+
+        public void close()
+        {
+            this.close(this);
+        }
+
+        public void close(object handle)
+        {
+            object[] result = new object[2];
+            if (handle.GetType() == typeof(FileSystemHandle))
+                ((FileSystemHandle)handle).ParentFS.CloseHandle((FileSystemHandle)handle);
+        }
+
+        public object[] read(double length)
+        {
+            int len = (int)length;
+            if (len == int.MinValue)
+                len = int.MaxValue;
+            if (Mode.HasFlag(FileSystemHandleMode.Write) || Mode.HasFlag(FileSystemHandleMode.Append))
+                return new object[] { null, OCErrors.BadFileDescriptor };
+            else
+            {
+                try
+                {
+                    if (len > FileStream.Length)
+                        len = Convert.ToInt32(FileStream.Length);
+                    string data = "";
+                    if (FileStream.Position == FileStream.Length)
+                        return new object[] { null, null };
+                    for (int i = 0; i < len; i++)
+                    {
+                        data += Convert.ToChar((byte)FileStream.ReadByte());
+                        VMEvents.OnDiskActivity(ParentFS.Address, DiskActivityType.Read);
+                    }
+                    return new object[] { data, null };
+                }
+                catch (Exception ex)
+                {
+                    if (ex is SecurityException || ex is AccessViolationException)
+                        return new object[] { null, OCErrors.PermissionDenied };
+                    else
+                        return new object[] { null, OCErrors.BadFileDescriptor };
+                }
+            }
+        }
+
+        public object[] write(string value)
+        {
+            if (Mode == FileSystemHandleMode.Read)
+                return new object[] { null, OCErrors.BadFileDescriptor };
+            else
+            {
+                try
+                {
+                    var data = value.GetBytes();
+                    if (Mode == FileSystemHandleMode.Write)
+                    {
+                        FileStream.Position = 0;
+                        for (int i = 0; i < data.Length; i++)
+                        {
+                            FileStream.WriteByte(data[i]);
+                            VMEvents.OnDiskActivity(ParentFS.Address, DiskActivityType.Write);
+                        }
+                    }
+                    if (Mode == FileSystemHandleMode.Append)
+                    {
+                        FileStream.Position = FileStream.Length;
+                        for (int i = 0; i < data.Length; i++)
+                        {
+                            FileStream.WriteByte(data[i]);
+                            VMEvents.OnDiskActivity(ParentFS.Address, DiskActivityType.Write);
+                        }
+                    }
+                    return new object[] { true, null };
+                }
+                catch (Exception ex)
+                {
+                    if (ex is SecurityException || ex is AccessViolationException)
+                        return new object[] { null, OCErrors.PermissionDenied };
+                    else
+                        return new object[] { null, OCErrors.BadFileDescriptor };
+                }
+            }
+        }
+
+        public object[] seek(string type)
+        {
+            return seek(type, 0);
+        }
+
+        public object[] seek(string type, int offset)
+        {
+            long value = 0;
+            type = type.ToLower();
+            try
+            {
+                switch (type)
+                {
+                    case "cur":
+                        value = FileStream.Seek(offset, SeekOrigin.Current);
+                        return new object[] { value, null };
+                    case "set":
+                        value = FileStream.Seek(offset, SeekOrigin.Begin);
+                        return new object[] { value, null };
+                    case "end":
+                        value = FileStream.Seek(offset, SeekOrigin.End);
+                        return new object[] { value, null };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new object[] { null, ex.Message };
+            }
+            return new object[] { null, OCErrors.BadFileDescriptor };
+        }
+    }
+
+    public enum FileSystemHandleMode
+    {
+        Read = FileAccess.Read, Write = FileAccess.Write, ReadWrite = FileAccess.ReadWrite, Append = 8, Unsupported = 0
     }
 }
