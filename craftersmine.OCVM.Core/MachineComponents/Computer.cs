@@ -11,8 +11,12 @@ namespace craftersmine.OCVM.Core.MachineComponents
     public sealed class Computer : BaseComponent
     {
         public Computer(string address) : base(address)
-        { 
-            
+        {
+            DeviceInfo.Class = DeviceClass.Processor;
+            DeviceInfo.Description = "Computer";
+            DeviceInfo.Product = "craftersmine OpenComputers Virtual Machine";
+            DeviceInfo.Vendor = "craftersmine";
+            DeviceInfo.Version = VM.CurrentVersion.ToString();
         }
     }
 }
