@@ -1,9 +1,9 @@
-﻿using System;
+﻿using craftersmine.OCVM.Core.Extensions;
+using NLua;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace craftersmine.OCVM.Core.MachineComponents
 {
@@ -24,16 +24,44 @@ namespace craftersmine.OCVM.Core.MachineComponents
 
         public DeviceInfo()
         {
-            Class = "class";
-            Description = "description";
-            Vendor = "vendor";
-            Product = "product";
-            Version = "version";
-            Serial = "serial";
-            Capacity = "capacity";
-            Size = "size";
-            Clock = "clock";
-            Width = "width";
+            Class = null;
+            Description = null;
+            Vendor = null;
+            Product = null;
+            Version = null;
+            Serial = null;
+            Capacity = null;
+            Size = null;
+            Clock = null;
+            Width = null;
+        }
+
+        public LuaTable GetDeviceInfoTable()
+        {
+            var table = VM.RunningVM.ExecModule.CreateTable();
+
+            if (!Class.IsNullEmptyOrWhitespace())
+                table["class"] = Class;
+            if (!Description.IsNullEmptyOrWhitespace())
+                table["description"] = Description;
+            if (!Vendor.IsNullEmptyOrWhitespace())
+                table["vendor"] = Vendor;
+            if (!Product.IsNullEmptyOrWhitespace())
+                table["product"] = Product;
+            if (!Version.IsNullEmptyOrWhitespace())
+                table["version"] = Version;
+            if (!Serial.IsNullEmptyOrWhitespace())
+                table["serial"] = Serial;
+            if (!Capacity.IsNullEmptyOrWhitespace())
+                table["capacity"] = Capacity;
+            if (!Size.IsNullEmptyOrWhitespace())
+                table["size"] = Size;
+            if (!Clock.IsNullEmptyOrWhitespace())
+                table["clock"] = Clock;
+            if (!Width.IsNullEmptyOrWhitespace())
+                table["width"] = Width;
+
+            return table;
         }
     }
 
