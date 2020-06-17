@@ -40,5 +40,21 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
                 return primaryFs.Address;
             else return null;
         }
+
+        public static int uptime()
+        {
+            int uptime = DateTime.Now.Second - VM.RunningVM.LaunchTime.Second;
+            return uptime;
+        }
+
+        public static long getFreeMemory()
+        {
+            return getTotalMemory() - GC.GetTotalMemory(false);
+        }
+
+        public static long getTotalMemory()
+        {
+            return 1024 * 1024 * 1024;
+        }
     }
 }
