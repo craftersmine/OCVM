@@ -16,6 +16,7 @@ namespace craftersmine.OCVM.Core
         public DeviceBus DeviceBus { get; set; }
         public Display Display { get; set; }
         public LuaExecutionModule ExecModule { get; set; }
+        public DateTime LaunchTime { get; private set; }
 
         public void Launch(Display display)
         {
@@ -29,6 +30,7 @@ namespace craftersmine.OCVM.Core
                 DeviceBus.ConnectDevice(eeprom);
             }
             RunningVM = this;
+            LaunchTime = DateTime.Now;
             //ExecModule.ExecuteString(((EEPROM)(DeviceBus.GetDevicesByType("eeprom", true)[0])).EEPROMCode);
         }
 
