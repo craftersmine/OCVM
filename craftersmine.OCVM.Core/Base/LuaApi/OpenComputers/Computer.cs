@@ -56,5 +56,17 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
         {
             return 1024 * 1024 * 1024;
         }
+
+        public static LuaTable getDeviceInfo()
+        {
+            LuaTable infos = VM.RunningVM.ExecModule.CreateTable();
+            var devices = VM.RunningVM.DeviceBus.GetDevices();
+            foreach (var dev in devices)
+            {
+                if (dev.DeviceInfo != null)
+                    infos[dev.Address] = dev.DeviceInfo.GetDeviceInfoTable();
+            }
+            return infos;
+        }
     }
 }
