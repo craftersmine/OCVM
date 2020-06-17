@@ -23,8 +23,15 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
             return Guid.Empty.ToString();
         }
         
-        public static void beep(int freq, float duration)
-        { }
+        public static void beep(float freq, float duration)
+        { 
+            try
+            {
+                SoundGenerator.PlaySine(freq, duration);
+            }
+            catch
+            { }
+        }
 
         public static string getBootAddress()
         {
