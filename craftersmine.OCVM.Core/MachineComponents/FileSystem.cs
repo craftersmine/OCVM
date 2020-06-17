@@ -128,6 +128,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
             {
                 LuaTable h = VM.RunningVM.ExecModule.CreateTable();
                 FileSystemHandle fsHandle = new FileSystemHandle(GetPath(path), m);
+                fsHandle.HandleId += fsHandle.HostFilePath.GetHashCode();
                 fsHandle.ParentFS = this;
                 handles.Add(fsHandle.HandleId, fsHandle);
 
