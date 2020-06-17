@@ -25,9 +25,10 @@ namespace craftersmine.OCVM.Core.MachineComponents
             DeviceInfo.Class = DeviceClass.Memory;
             DeviceInfo.Description = "EEPROM";
             DeviceInfo.Vendor = DeviceInfo.DefaultVendor;
-            DeviceInfo.Product = "Fast-Flash 2K";
+            DeviceInfo.Product = "FastFlash " + (capacity + 1) / 1024 + "K";
             DeviceInfo.Capacity = capacity.ToString();
             DeviceInfo.Size = capacity.ToString();
+            DeviceInfo.Version = VM.CurrentVersion.ToString();
         }
 
         public static bool LoadEEPROM(string eepromCode, out EEPROM eeprom, int maxSize = 4095)
