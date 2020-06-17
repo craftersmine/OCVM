@@ -46,6 +46,16 @@ namespace craftersmine.OCVM.Core.MachineComponents
             else throw new ExcededBusLanesException("Max bus lanes on device bus is excedeed " + MaxBusLanes);
         }
 
+        public IComponent[] GetDevices()
+        {
+            List<IComponent> devs = new List<IComponent>();
+            foreach (var dev in components)
+            {
+                devs.Add(dev.Value);
+            }
+            return devs.ToArray();
+        }
+
         public IComponent GetDevice(string address)
         {
             foreach (var addr in components.Keys)
