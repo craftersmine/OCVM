@@ -20,6 +20,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
         public BaseComponent()
         {
             Address = Guid.NewGuid().ToString();
+            DeviceInfo = new DeviceInfo();
         }
 
         public BaseComponent(string address) : base()
