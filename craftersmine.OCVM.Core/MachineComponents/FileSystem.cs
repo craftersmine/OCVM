@@ -20,25 +20,48 @@ namespace craftersmine.OCVM.Core.MachineComponents
         public string HostFolderPath { get { return hostFolderPath; } }
         public string FileSystemRootPath { get { return Path.Combine(hostFolderPath, "storage\\"); } }
         public string MetadataFilePath { get { return Path.Combine(hostFolderPath, "ocvm.filesystem.metadata"); } }
-        private FileSystem() : base() { }
+        private FileSystem() : base() 
+        {
+        }
         private FileSystem(string hostFolderPath) : base()
         {
             this.hostFolderPath = hostFolderPath;
+            var drv = new DriveInfo(HostFolderPath.Substring(0, 2));
+            if (drv != null)
+            {
+                DeviceInfo.Capacity = drv.TotalSize.ToString();
+                DeviceInfo.Size = drv.AvailableFreeSpace.ToString();
+            }
+            else
+            {
+                DeviceInfo.Capacity = "N/A";
+                DeviceInfo.Size = "N/A";
+            }
+            DeviceInfo.Product = "craftersmine OCVM Virtual Filesystem";
+            DeviceInfo.Version = VM.CurrentVersion.ToString();
+            DeviceInfo.Vendor = DeviceInfo.DefaultVendor;
+            DeviceInfo.Clock = "0/0/0";
+            DeviceInfo.Description = "Filesystem";
         }
 
-        public void RestoreFileSystem()
+        public string RestoreFileSystem()
         {
             string[] metadataToRestore = {
                 "version=1",
                 "filesystem.address=" + Address
             };
 
+            string retrievedAddress = "";
+
             if (!Directory.Exists(HostFolderPath))
                 Directory.CreateDirectory(HostFolderPath);
             if (!Directory.Exists(FileSystemRootPath))
                 Directory.CreateDirectory(FileSystemRootPath);
             if (!File.Exists(MetadataFilePath))
+            {
                 File.WriteAllLines(MetadataFilePath, metadataToRestore);
+                return Address;
+            }
             else
             {
                 bool isNeededRestore = false;
@@ -54,20 +77,29 @@ namespace craftersmine.OCVM.Core.MachineComponents
                                     isNeededRestore = true;
                                 break;
                             case "filesystem.address":
-                                if (separated[1] != Address)
+                                if (!Guid.TryParse(separated[1], out Guid addr))
                                     isNeededRestore = true;
+                                else retrievedAddress = separated[1];
                                 break;
                         }
+                    else isNeededRestore = true;
                 }
                 if (isNeededRestore)
+                {
                     File.WriteAllLines(MetadataFilePath, metadataToRestore);
+                    return Address;
+                }
+                else
+                    return retrievedAddress;
             }
         }
 
         public static FileSystem MountFileSystem(string hostFolderPath)
         {
             FileSystem fs = new FileSystem(hostFolderPath);
-            fs.RestoreFileSystem();
+            var restoredAddress = fs.RestoreFileSystem();
+            if (!restoredAddress.IsNullEmptyOrWhitespace())
+                fs.Address = restoredAddress;
             return fs;
         }
 
