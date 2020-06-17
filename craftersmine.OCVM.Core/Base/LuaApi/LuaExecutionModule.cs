@@ -57,7 +57,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             return await Task<object[]>.Run(new Func<object[]>(() => {
                 try
                 {
-                    str = "import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.MachineComponents');local component = require('component');local computer = require('computer');\r\n" + str;
+                    str = "import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.Base.LuaApi.OpenComputers');import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.MachineComponents');local component = require('component');local computer = require('computer');_G['computer'] = computer;_G['component'] = component;\r\n" + str;
                     var code = env.LoadString(str, chunkName);
                     return code.Call();
                 }
