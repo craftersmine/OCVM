@@ -11,7 +11,7 @@ function computer.getBootAddress()
 end
 
 function computer.setBootAddress(address)
-	if not address then address = "";
+	if not address then address = ""; end;
 	Computer.setBootAddress(address);
 end
 
@@ -35,6 +35,10 @@ end
 
 function computer.getTotalMemory()
 	return Computer.getTotalMemory();
+end
+
+function computer.getDeviceInfo()
+	return Computer.getDeviceInfo();
 end
 
 return computer;
