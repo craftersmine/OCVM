@@ -31,8 +31,12 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
         private void PrintException(Exception e)
         {
             VM.RunningVM.Display.SetColor(BaseColors.Black, BaseColors.Red);
+            Console.ForegroundColor = ConsoleColor.Red;
             Root.print(e.Source + e.Message);
+            Console.WriteLine(e.Source);
+            Console.WriteLine(e.Message);
             VM.RunningVM.Display.SetColor(BaseColors.Black, BaseColors.White);
+            Console.ResetColor();
         }
 
         public async Task<object[]> ExecuteFile(string path)
