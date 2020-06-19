@@ -15,6 +15,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
         //private int maxRamForLoad;
         //private readonly Script env;
         private readonly Lua env;
+        private object locker = new object();
 
         public Random Random { get; private set; }
 
@@ -30,9 +31,29 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
 
         private void PrintException(Exception e)
         {
-            VM.RunningVM.Display.SetColor(BaseColors.Black, BaseColors.Red);
+            VM.RunningVM.Display.SetColor(BaseColors.Blue, BaseColors.White);
+            VM.RunningVM.Display.ClearScreenBuffer();
             Console.ForegroundColor = ConsoleColor.Red;
-            Root.print(e.Source + e.Message);
+            string uerr = "Unrecoverable error";
+            int xPos1 = (VM.RunningVM.Display.DisplayWidth / 2) - (uerr.Length / 2);
+            int yPos1 = (VM.RunningVM.Display.DisplayHeight / 2) - 3;
+            VM.RunningVM.Display.PlaceString(xPos1, yPos1, uerr, VM.RunningVM.Display.ForeColor, VM.RunningVM.Display.BackColor);
+            if (e.Message.Length > VM.RunningVM.Display.DisplayWidth)
+            {
+                for (int i = 0; i < e.Message.Length / VM.RunningVM.Display.DisplayWidth; i++)
+                {
+                    string tmpStr = e.Message.Substring(i * VM.RunningVM.Display.DisplayWidth, VM.RunningVM.Display.DisplayWidth);
+                    int xPos2 = (VM.RunningVM.Display.DisplayWidth / 2) - (tmpStr.Length / 2);
+                    int yPos2 = (VM.RunningVM.Display.DisplayHeight / 2) + 1;
+                    VM.RunningVM.Display.PlaceString(xPos1, yPos1, tmpStr, VM.RunningVM.Display.ForeColor, VM.RunningVM.Display.BackColor);
+                }
+            }
+            else
+            {
+                int xPos2 = (VM.RunningVM.Display.DisplayWidth / 2) - (e.Message.Length / 2);
+                int yPos2 = (VM.RunningVM.Display.DisplayHeight / 2);
+                VM.RunningVM.Display.PlaceString(xPos1, yPos1, e.Message, VM.RunningVM.Display.ForeColor, VM.RunningVM.Display.BackColor);
+            }
             Console.WriteLine(e.Source);
             Console.WriteLine(e.Message);
             VM.RunningVM.Display.SetColor(BaseColors.Black, BaseColors.White);
@@ -56,21 +77,39 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             }));
         }
 
+        public void Close()
+        {
+            lock (locker)
+            {
+                if (env.IsExecuting)
+                    env.Close();
+            }
+        }
+
         public async Task<object[]> ExecuteString(string str, string chunkName = "mainChunk")
         {
+            VMEvents.VMStateChanged += VMEvents_VMStateChanged;
             return await Task<object[]>.Run(new Func<object[]>(() => {
                 try
                 {
-                    str = "import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.Base.LuaApi.OpenComputers');import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.MachineComponents');local component = require('component');local computer = require('computer');_G['computer'] = computer;_G['component'] = component;\r\n" + str;
+                    str = "import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.Base.LuaApi.OpenComputers');import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.MachineComponents');local component = require('component');local computer = require('computer');local std = require('stdlib');local unicode = require('unicode');_G['computer'] = computer;_G['component'] = component;_G['unicode'] = unicode;_G['checkArg'] = std.checkArg;_G['dofile'] = nil;\r\n" + str;
                     var code = env.LoadString(str, chunkName);
                     return code.Call();
                 }
                 catch (Exception ex)
                 {
                     PrintException(ex);
+                    if (ex.Message.Contains(OCErrors.NoBootableMediumFound))
+                        SoundGenerator.BeepMorse("--");
                     return null;
                 }
             }));
+        }
+
+        private void VMEvents_VMStateChanged(object sender, VMStateChangedEventArgs e)
+        {
+            if (e.State == VMState.Stopped || e.State == VMState.Rebooting || e.State == VMState.Stopping)
+                Close();
         }
 
         public LuaTable SetMetatable(LuaTable table, LuaTable metatable)
@@ -99,6 +138,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             //env.Globals["print"] = (Action<string>)Root.print;
             env.RegisterFunction("print", typeof(Root).GetMethod("print"));
             env.RegisterFunction("breakpoint", typeof(Root).GetMethod("breakpoint"));
+            env.RegisterFunction("checkArgType", typeof(Root).GetMethod("checkArgType"));
         }
 
         public void RegisterModules()
