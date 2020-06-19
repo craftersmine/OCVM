@@ -7,11 +7,14 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using craftersmine.OCVM.Core.Base.LuaApi;
 using System.Reflection;
+using System.Threading;
 
 namespace craftersmine.OCVM.Core
 {
     public sealed class VM
     {
+        private Thread ExecutionThread { get; set; }
+
         public static VM RunningVM { get; private set; }
         public static Version CurrentVersion { get { return Assembly.GetExecutingAssembly().GetName().Version; } }
 
@@ -19,9 +22,11 @@ namespace craftersmine.OCVM.Core
         public Display Display { get; set; }
         public LuaExecutionModule ExecModule { get; set; }
         public DateTime LaunchTime { get; private set; }
+        public VMState State { get; private set; }
 
-        public void Launch(Display display)
+        public void Initialize(Display display)
         {
+            ExecutionThread = new Thread(new ThreadStart(ExecuteLuaCode));
             ExecModule = new LuaExecutionModule(0);
             DeviceBus = new DeviceBus(8);
             Display = display;
@@ -33,12 +38,35 @@ namespace craftersmine.OCVM.Core
             }
             RunningVM = this;
             LaunchTime = DateTime.Now;
-            //ExecModule.ExecuteString(((EEPROM)(DeviceBus.GetDevicesByType("eeprom", true)[0])).EEPROMCode);
+            VMEvents.OnVMReady();
         }
 
-        public void Stop()
+        private void ExecuteLuaCode()
         {
-
+            VM.RunningVM.ExecModule.ExecuteString(((EEPROM)VM.RunningVM.DeviceBus.GetPrimaryComponent("eeprom")).EEPROMCode);
         }
+
+        public void Stop(bool reboot)
+        {
+            if (!reboot)
+                SetState(VMState.Stopping);
+            else SetState(VMState.Rebooting);
+        }
+
+        public void SetState(VMState state)
+        {
+            State = state;
+            VMEvents.OnVMStateChanged(state);
+        }
+
+        public void Run()
+        {
+            ExecutionThread.Start();
+        }
+    }
+
+    public enum VMState
+    {
+        Running, Stopping, Rebooting, Stopped
     }
 }
