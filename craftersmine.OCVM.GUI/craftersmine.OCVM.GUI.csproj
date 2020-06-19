@@ -136,6 +136,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="lua\computer.lua">
+    <None Include="..\craftersmine.OCVM.Resources\lua\unicode.lua">
+      <Link>lua\unicode.lua</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Properties\Settings.settings">
