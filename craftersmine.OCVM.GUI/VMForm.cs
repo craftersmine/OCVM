@@ -10,7 +10,6 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -19,18 +18,75 @@ namespace craftersmine.OCVM.GUI
     public partial class VMForm : Form
     {
         private TimeSpan frameTime = TimeSpan.Zero;
-        private Dictionary<string, ToolStripStatusLabel> statusIcons = new Dictionary<string, ToolStripStatusLabel>();
+        private Dictionary<string, StatusIcon> statusIcons = new Dictionary<string, StatusIcon>();
+        private Timer resetTimer = new Timer();
 
         public VMForm(Tier displayTier)
         {
             InitializeComponent();
+            resetTimer.Interval = 20;
+            resetTimer.Tick += ResetTimer_Tick;
             display1.SetTier(displayTier);
             LuaApi.DisplayOutput += LuaApi_DisplayOutput;
             LuaApi.DisplayScroll += LuaApi_DisplayScroll;
             LuaApi.DisplayCursorPositionChange += LuaApi_DisplayCursorPositionChange;
             display1.DisplayRedrawn += Display1_DisplayRedrawn;
             display1.EnableCursor = true;
-            new VM().Launch(display1);
+            VM vm = new VM();
+            VMEvents.DiskActivity += VMEvents_DiskActivity;
+            VMEvents.VMReady += VMEvents_VMLaunched;
+            VMEvents.VMStateChanged += VMEvents_VMStateChanged;
+            vm.Initialize(display1);
+        }
+
+        private void VMEvents_VMStateChanged(object sender, VMStateChangedEventArgs e)
+        {
+            if (e.State == VMState.Rebooting || e.State == VMState.Stopped || e.State == VMState.Stopping)
+                display1.ClearScreenBuffer();
+        }
+
+        private void VMEvents_VMLaunched(object sender, EventArgs e)
+        {
+            CreateStatusIcons();
+            resetTimer.Start();
+            VM.RunningVM.Run();
+        }
+
+        private void CreateStatusIcons()
+        {
+            var fs = VM.RunningVM.DeviceBus.GetDevicesByType("filesystem", false);
+            foreach (var fse in fs)
+            {
+                CreateStatusIcon(new StatusIcon(fse.Address, Resources.hdd_idle));
+                statusIcons[fse.Address].Tooltip = "Mounted Filesystem:\r\nAddress: " + fse.Address + "\r\nHost path: " + ((FileSystem)fse).HostFolderPath;
+                statusIcons[fse.Address].AddImage("read", Resources.hdd_read);
+                statusIcons[fse.Address].AddImage("write", Resources.hdd_write);
+            }
+            PutIcons();
+        }
+
+        private void ResetTimer_Tick(object sender, EventArgs e)
+        {
+            foreach (var icon in statusIcons)
+            {
+                ShowStatusIcon(icon.Key, "default");
+            }
+        }
+
+        private void VMEvents_DiskActivity(object sender, DiskActivityEventArgs e)
+        {
+            switch (e.DiskActivityType)
+            {
+                case DiskActivityType.Read:
+                    ShowStatusIcon(e.FileSystemAddress, "read");
+                    break;
+                case DiskActivityType.Write:
+                    ShowStatusIcon(e.FileSystemAddress, "write");
+                    break;
+                default:
+                    ShowStatusIcon(e.FileSystemAddress, "default");
+                    break;
+            }
         }
 
         private void Display1_DisplayRedrawn(object sender, DisplayRedrawnEventArgs e)
@@ -125,41 +181,49 @@ namespace craftersmine.OCVM.GUI
 
         private void Restart_Click(object sender, EventArgs e)
         {
-            display1.ScrollScreenBuffer();
+            VM.RunningVM.Stop(true);
         }
 
         private void Shutdown_Click(object sender, EventArgs e)
         {
-            for (int y = 0; y < display1.DisplayHeight; y++)
-                display1.PlaceString(0, y, "Scrolling test " + y, display1.ForeColor, display1.BackColor);
-            display1.Redraw();
+            VM.RunningVM.Stop(false);
         }
 
         int count = 0;
 
         private void Configure_Click(object sender, EventArgs e)
         {
-            VM.RunningVM.ExecModule.ExecuteString(((EEPROM)VM.RunningVM.DeviceBus.GetPrimaryComponent("eeprom")).EEPROMCode);
+            
         }
 
         private void aboutMenu_Click(object sender, EventArgs e)
         {
-            CreateStatusIcon("test" + count++, Resources.configure);
+
         }
 
-        public ToolStripStatusLabel CreateStatusIcon(string id, Image image)
+        public void ShowStatusIcon(string iconId, string imageId)
         {
-            ToolStripStatusLabel icon = new ToolStripStatusLabel(image);
-            icon.Name = id;
-            icon.Text = "";
-            icon.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            if (!statusIcons.ContainsKey(id))
+            if (statusIcons.ContainsKey(iconId))
+                if (statusIcons[iconId].ImageList.ContainsKey(imageId))
+                    if (InvokeRequired)
+                        Invoke(new Action(() => { statusIcons[iconId].ToolStripStatusLabel.Image = statusIcons[iconId].ImageList[imageId]; }));
+                    else { statusIcons[iconId].ToolStripStatusLabel.Image = statusIcons[iconId].ImageList[imageId]; }
+        }
+
+        public void PutIcons()
+        {
+            foreach (var icon in statusIcons)
             {
-                statusIcons.Add(id, icon);
-                statusStrip1.Items.Add(icon);
+                statusStrip1.Items.Add(icon.Value.ToolStripStatusLabel);
             }
-            else throw new Exception("Status icon exists! " + id);
-            return icon;
+        }
+
+        public ToolStripStatusLabel CreateStatusIcon(StatusIcon statusIcon)
+        {
+            if (!statusIcons.ContainsKey(statusIcon.Id))
+                statusIcons.Add(statusIcon.Id, statusIcon);
+            else throw new Exception("Status icon exists! " + statusIcon.Id);
+            return statusIcon.ToolStripStatusLabel;
         }
     }
 }
