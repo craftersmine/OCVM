@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using craftersmine.OCVM.Core.MachineComponents;
 using craftersmine.OCVM.Core.Extensions;
 using NLua;
-using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
 {
@@ -33,12 +32,50 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
             { }
         }
 
+        public static void beep(string pattern)
+        {
+            try
+            {
+                SoundGenerator.BeepMorse(pattern);
+            }
+            catch
+            { }
+        }
+
         public static string getBootAddress()
         {
-            var primaryFs = VM.RunningVM.DeviceBus.GetPrimaryComponent("filesystem");
-            if (primaryFs != null)
-                return primaryFs.Address;
-            else return null;
+            MachineComponents.Computer computer = VM.RunningVM.DeviceBus.GetPrimaryComponent("computer") as MachineComponents.Computer;
+            string bootableAddress = null;
+            if (!computer.PrimaryBootDevice.IsNullEmptyOrWhitespace())
+            {
+                var bootableFs = VM.RunningVM.DeviceBus.GetDevice(computer.PrimaryBootDevice);
+                if (bootableFs != null)
+                    bootableAddress = bootableFs.Address;
+                else
+                {
+                    var primaryFs = VM.RunningVM.DeviceBus.GetPrimaryComponent("filesystem");
+                    if (primaryFs != null)
+                        bootableAddress = primaryFs.Address;
+                }
+            }
+            else
+            {
+                var primaryFs = VM.RunningVM.DeviceBus.GetPrimaryComponent("filesystem");
+                if (primaryFs != null)
+                    bootableAddress = primaryFs.Address;
+            }
+            return bootableAddress;
+        }
+
+        public static void setBootAddress()
+        {
+            setBootAddress("");
+        }
+
+        public static void setBootAddress(string address)
+        {
+            MachineComponents.Computer computer = VM.RunningVM.DeviceBus.GetPrimaryComponent("computer") as MachineComponents.Computer;
+            computer.PrimaryBootDevice = address;
         }
 
         public static int uptime()
@@ -49,12 +86,12 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
 
         public static long getFreeMemory()
         {
-            return getTotalMemory() - GC.GetTotalMemory(false);
+            return getTotalMemory() - 1024 * 1024;
         }
 
         public static long getTotalMemory()
         {
-            return 1024 * 1024 * 1024;
+            return 16 * 1024 * 1024;
         }
 
         public static LuaTable getDeviceInfo()
@@ -68,5 +105,77 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
             }
             return infos;
         }
+
+        public static int maxEnergy()
+        {
+            return int.MaxValue;
+        }
+
+        public static int energy()
+        {
+            return int.MaxValue;
+        }
+
+        public static LuaTable users()
+        {
+            LuaTable users = VM.RunningVM.ExecModule.CreateTable();
+            MachineComponents.Computer computer = VM.RunningVM.DeviceBus.GetPrimaryComponent("computer") as MachineComponents.Computer;
+            int count = 1;
+            foreach (var usr in computer.GetUsers())
+            {
+                users[count] = usr;
+                count++;
+            }
+            return users;
+        }
+
+        public static string getArchitecture()
+        {
+            return "Lua 5.3";
+        }
+
+        public static LuaTable getArchitectures()
+        {
+            LuaTable table = VM.RunningVM.ExecModule.CreateTable();
+
+            table[1] = "Lua 5.3";
+            table[2] = "x86";
+            table["n"] = 2;
+
+            return table;
+        }
+
+        public static void setArchitecture(string arch)
+        { }
+
+        public static bool addUser(string user, out string errorMsg)
+        {
+            MachineComponents.Computer computer = VM.RunningVM.DeviceBus.GetPrimaryComponent("computer") as MachineComponents.Computer;
+            bool result = computer.AddUser(user, out errorMsg);
+            return result;
+        }
+
+        public static bool removeUser(string user)
+        {
+            MachineComponents.Computer computer = VM.RunningVM.DeviceBus.GetPrimaryComponent("computer") as MachineComponents.Computer;
+            return computer.RemoveUser(user);
+        }
+
+        public static void pushSignal(string name, LuaTable data)
+        {
+            MachineComponents.Computer computer = VM.RunningVM.DeviceBus.GetPrimaryComponent("computer") as MachineComponents.Computer;
+            computer.PushSignal(name, data);
+        }
+
+        public static string pullSignal(int timeout, out LuaTable data)
+        {
+            MachineComponents.Computer computer = VM.RunningVM.DeviceBus.GetPrimaryComponent("computer") as MachineComponents.Computer;
+            Signal sig = computer.PullSignal();
+            data = sig.Data;
+            return sig.Name;
+        } 
+
+        public static void shutdown(bool reboot)
+        { }
     }
 }
