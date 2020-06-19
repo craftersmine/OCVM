@@ -89,6 +89,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="StatusIcon.cs" />
     <Compile Include="VMForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -127,6 +128,10 @@
       <Link>lua\component.lua</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="..\craftersmine.OCVM.Resources\lua\computer.lua">
+      <Link>lua\computer.lua</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="..\craftersmine.OCVM.Resources\lua\machine.lua">
       <Link>lua\machine.lua</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -135,7 +140,6 @@
       <Link>lua\stdlib.lua</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="lua\computer.lua">
     <None Include="..\craftersmine.OCVM.Resources\lua\unicode.lua">
       <Link>lua\unicode.lua</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -191,6 +195,15 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\hdd_write.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\hdd_read.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\hdd_idle.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
