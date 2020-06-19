@@ -24,5 +24,21 @@ namespace craftersmine.OCVM.Core
                 }
             }
         }
+
+        public static void BeepMorse(string code)
+        {
+            foreach (var c in code)
+            {
+                switch (c)
+                {
+                    case '-':
+                        PlaySine(1000, 0.2f);
+                        break;
+                    case '.':
+                        PlaySine(1000, 0.1f);
+                        break;
+                }
+            }
+        }
     }
 }
