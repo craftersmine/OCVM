@@ -49,6 +49,25 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             }
         }
 
+        public static bool checkArgType(string argLuaType, params string[] checkTypes)
+        {
+            try
+            {
+                foreach (var type in checkTypes)
+                {
+                    if (argLuaType.ToLower() == type.ToLower())
+                        return true;
+                    else continue;
+                }
+                return false;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
         public static void breakpoint(object data)
         {
             print("OCVM_INTERNAL_LUA_BREAKPOINT_HIT: " + data);
