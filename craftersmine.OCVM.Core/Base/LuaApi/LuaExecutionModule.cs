@@ -16,6 +16,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
         //private readonly Script env;
         private readonly Lua env;
         private object locker = new object();
+        private bool abort = false;
 
         public Random Random { get; private set; }
 
@@ -24,9 +25,20 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             Random = new Random();
             env = new Lua();
             env.UseTraceback = true;
+            env.SetDebugHook(KeraLua.LuaHookMask.Line, 0);
+            env.DebugHook += Env_DebugHook;
             env.LoadCLRPackage();
             RegisterGlobals();
             RegisterModules();
+        }
+
+        private void Env_DebugHook(object sender, NLua.Event.DebugHookEventArgs e)
+        {
+            if (abort)
+            {
+                Lua lState = (Lua)sender;
+                lState.State.Error(OCErrors.MachineHalted);
+            }
         }
 
         private void PrintException(Exception e)
@@ -93,11 +105,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
 
         public void Close()
         {
-            lock (locker)
-            {
-                if (env.IsExecuting)
-                    env.Close();
-            }
+            abort = true;
         }
 
         public async Task<object[]> ExecuteString(string str, string chunkName = "mainChunk")
