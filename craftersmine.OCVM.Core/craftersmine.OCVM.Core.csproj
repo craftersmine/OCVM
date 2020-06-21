@@ -85,6 +85,7 @@
     <Compile Include="Attributes\LuaCallbackAttribute.cs" />
     <Compile Include="Base\LuaApi\OpenComputers\Unicode.cs" />
     <Compile Include="Base\LuaMethodInfo.cs" />
+    <Compile Include="Base\ScreenBuffer.cs" />
     <Compile Include="Base\Tier.cs" />
     <Compile Include="Display.cs">
       <SubType>UserControl</SubType>
