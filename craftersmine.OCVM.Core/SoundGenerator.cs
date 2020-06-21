@@ -12,7 +12,7 @@ namespace craftersmine.OCVM.Core
     {
         public static void PlaySine(float frequency, float duration)
         {
-            SignalGenerator generator = new SignalGenerator(44800, 2) { Frequency = frequency, Gain = 0.15, Type = SignalGeneratorType.Sin };
+            SignalGenerator generator = new SignalGenerator(44800, 2) { Frequency = frequency, Gain = 0.05, Type = SignalGeneratorType.Sin };
             var samples = generator.Take(TimeSpan.FromSeconds(duration));
             using (var wo = new WaveOutEvent())
             {
@@ -32,10 +32,10 @@ namespace craftersmine.OCVM.Core
                 switch (c)
                 {
                     case '-':
-                        PlaySine(1000, 0.2f);
+                        PlaySine(1000, 0.4f);
                         break;
                     case '.':
-                        PlaySine(1000, 0.1f);
+                        PlaySine(1000, 0.2f);
                         break;
                 }
             }
