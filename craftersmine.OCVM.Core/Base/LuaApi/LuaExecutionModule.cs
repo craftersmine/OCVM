@@ -31,32 +31,46 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
 
         private void PrintException(Exception e)
         {
-            VM.RunningVM.Display.SetColor(BaseColors.Blue, BaseColors.White);
-            VM.RunningVM.Display.ClearScreenBuffer();
+            ScreenBuffer.Instance.Begin();
+            ScreenBuffer.Instance.ClearColor = BaseColors.Blue;
+            ScreenBuffer.Instance.Clear();
             Console.ForegroundColor = ConsoleColor.Red;
             string uerr = "Unrecoverable error";
-            int xPos1 = (VM.RunningVM.Display.DisplayWidth / 2) - (uerr.Length / 2);
-            int yPos1 = (VM.RunningVM.Display.DisplayHeight / 2) - 3;
-            VM.RunningVM.Display.PlaceString(xPos1, yPos1, uerr, VM.RunningVM.Display.ForeColor, VM.RunningVM.Display.BackColor);
-            if (e.Message.Length > VM.RunningVM.Display.DisplayWidth)
+            int xPos1 = (ScreenBuffer.Instance.Width / 2) - (uerr.Length / 2);
+            int yPos1 = (ScreenBuffer.Instance.Height / 2) - 3;
+            for (int i = 0; i < uerr.Length; i++)
             {
-                for (int i = 0; i < e.Message.Length / VM.RunningVM.Display.DisplayWidth; i++)
+                ScreenBuffer.Instance.Set(xPos1 + i, yPos1, uerr[i], BaseColors.White, BaseColors.Blue);
+            }
+            if (e.Message.Length > ScreenBuffer.Instance.Width)
+            {
+                for (int i = 0; i <= e.Message.Length / ScreenBuffer.Instance.Width; i++)
                 {
-                    string tmpStr = e.Message.Substring(i * VM.RunningVM.Display.DisplayWidth, VM.RunningVM.Display.DisplayWidth);
-                    int xPos2 = (VM.RunningVM.Display.DisplayWidth / 2) - (tmpStr.Length / 2);
-                    int yPos2 = (VM.RunningVM.Display.DisplayHeight / 2) + 1;
-                    VM.RunningVM.Display.PlaceString(xPos1, yPos1, tmpStr, VM.RunningVM.Display.ForeColor, VM.RunningVM.Display.BackColor);
+                    string tmpStr = "";
+                    if (e.Message.Substring(i * ScreenBuffer.Instance.Width).Length >= ScreenBuffer.Instance.Width)
+                        tmpStr = e.Message.Substring(i * ScreenBuffer.Instance.Width, ScreenBuffer.Instance.Width);
+                    else tmpStr = e.Message.Substring(i * ScreenBuffer.Instance.Width);
+                    int xPos2 = (ScreenBuffer.Instance.Width / 2) - (tmpStr.Length / 2);
+                    int yPos2 = (ScreenBuffer.Instance.Height / 2) + i;
+                    for (int j = 0; j < tmpStr.Length; j++)
+                    {
+                        ScreenBuffer.Instance.Set(xPos2 + j, yPos2, tmpStr[j], BaseColors.White, BaseColors.Blue);
+                    }
                 }
             }
             else
             {
-                int xPos2 = (VM.RunningVM.Display.DisplayWidth / 2) - (e.Message.Length / 2);
-                int yPos2 = (VM.RunningVM.Display.DisplayHeight / 2);
-                VM.RunningVM.Display.PlaceString(xPos1, yPos1, e.Message, VM.RunningVM.Display.ForeColor, VM.RunningVM.Display.BackColor);
+                for (int i = 0; i < e.Message.Length; i++)
+                {
+                    int xPos2 = (ScreenBuffer.Instance.Width / 2) - (e.Message.Length / 2);
+                    int yPos2 = (ScreenBuffer.Instance.Height / 2);
+                    ScreenBuffer.Instance.Set(xPos2 + i, yPos2, e.Message[i], BaseColors.White, BaseColors.Blue);
+                }
             }
+            ScreenBuffer.Instance.End();
             Console.WriteLine(e.Source);
             Console.WriteLine(e.Message);
-            VM.RunningVM.Display.SetColor(BaseColors.Black, BaseColors.White);
+            //VM.RunningVM.Display.SetColor(BaseColors.Black, BaseColors.White);
             Console.ResetColor();
         }
 
@@ -98,9 +112,23 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
                 }
                 catch (Exception ex)
                 {
-                    PrintException(ex);
                     if (ex.Message.Contains(OCErrors.NoBootableMediumFound))
+                    {
+                        PrintException(ex);
                         SoundGenerator.BeepMorse("--");
+                    }
+                    else if (ex.Message.Contains(OCErrors.MachineHalted))
+                    {
+                        ScreenBuffer.Instance.Begin();
+                        ScreenBuffer.Instance.ClearColor = BaseColors.Black;
+                        ScreenBuffer.Instance.Clear();
+                        ScreenBuffer.Instance.End();
+                    }
+                    else
+                    {
+                        PrintException(ex);
+                        SoundGenerator.BeepMorse("..-");
+                    }
                     return null;
                 }
             }));
