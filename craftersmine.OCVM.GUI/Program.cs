@@ -15,7 +15,7 @@ namespace craftersmine.OCVM.GUI
         static void Main()
         {
             Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            Application.SetCompatibleTextRenderingDefault(true);
             Application.Run(new VMForm(Core.Base.Tier.Base));
         }
     }
