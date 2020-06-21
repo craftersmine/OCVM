@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace craftersmine.OCVM.Core.Base.LuaApi
@@ -32,14 +31,28 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
 
             if (combined == null)
             {
-                LuaApi.InvokeDisplayOutput(new DisplayOutputEventArgs() { UseDefaultColors = true, StringValue = "nil", Position = VM.RunningVM.Display.CursorPosition });
+                Console.WriteLine("nil");
+                //LuaApi.InvokeDisplayOutput(new DisplayOutputEventArgs() { UseDefaultColors = true, StringValue = "nil", Position = VM.RunningVM.Display.CursorPosition });
+                for (int i = 0; i < 3; i++)
+                {
+                    ScreenBuffer.Instance.Begin();
+                    ScreenBuffer.Instance.Set(i, VM.RunningVM.Display.CursorPosition.Y, "nil"[i], BaseColors.White, BaseColors.Black);
+                    ScreenBuffer.Instance.End();
+                }
             }
             else
             {
-                LuaApi.InvokeDisplayOutput(new DisplayOutputEventArgs() { UseDefaultColors = true, StringValue = combined, Position = VM.RunningVM.Display.CursorPosition });
+                Console.WriteLine(combined);
+                ScreenBuffer.Instance.Begin();
+                //LuaApi.InvokeDisplayOutput(new DisplayOutputEventArgs() { UseDefaultColors = true, StringValue = combined, Position = VM.RunningVM.Display.CursorPosition });
+                for (int i = 0; i < combined.Length; i++)
+                {
+                    ScreenBuffer.Instance.Set(i, VM.RunningVM.Display.CursorPosition.Y, combined[i], BaseColors.White, BaseColors.Black);
+                }
+                ScreenBuffer.Instance.End();
                 if (displayCursorY == VM.RunningVM.Display.DisplayHeight - 1)
                 {
-                    LuaApi.InvokeDisplayScroll();
+                    ScreenBuffer.Instance.Scroll();
                 }
                 else
                 {
