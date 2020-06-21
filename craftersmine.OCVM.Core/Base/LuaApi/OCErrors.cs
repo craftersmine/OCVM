@@ -15,5 +15,6 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
         public static readonly string PermissionDenied = "access denied";
         public static readonly string UserExists = "user exists";
         public static readonly string NoBootableMediumFound = "no bootable medium found";
+        public static readonly string MachineHalted = "machine halted";
     }
 }
