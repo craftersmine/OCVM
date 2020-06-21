@@ -45,7 +45,7 @@
             this.configure = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.status = new System.Windows.Forms.ToolStripStatusLabel();
-            this.display1 = new craftersmine.OCVM.Core.Display();
+            this.displayControl1 = new craftersmine.OCVM.Core.DisplayControl();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -195,25 +195,20 @@
             this.status.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
             this.status.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.status.Name = "status";
-            this.status.Size = new System.Drawing.Size(462, 19);
+            this.status.Size = new System.Drawing.Size(493, 19);
             this.status.Spring = true;
             this.status.Text = "{status}";
             this.status.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // display1
+            // displayControl1
             // 
-            this.display1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(27)))), ((int)(((byte)(27)))));
-            this.display1.CursorPosition = new System.Drawing.Point(0, 0);
-            this.display1.DisplayHeight = 16;
-            this.display1.DisplayWidth = 50;
-            this.display1.EnableCursor = true;
-            this.display1.Font = new System.Drawing.Font("Lucida Console", 12F);
-            this.display1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.display1.Location = new System.Drawing.Point(0, 49);
-            this.display1.Name = "display1";
-            this.display1.ShowCharactersBounds = false;
-            this.display1.Size = new System.Drawing.Size(508, 256);
-            this.display1.TabIndex = 6;
+            this.displayControl1.CursorPosition = new System.Drawing.Point(0, 0);
+            this.displayControl1.DrawCharacterCells = false;
+            this.displayControl1.Location = new System.Drawing.Point(0, 52);
+            this.displayControl1.MinimumSize = new System.Drawing.Size(1, 1);
+            this.displayControl1.Name = "displayControl1";
+            this.displayControl1.Size = new System.Drawing.Size(508, 251);
+            this.displayControl1.TabIndex = 6;
             // 
             // VMForm
             // 
@@ -221,7 +216,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(508, 330);
-            this.Controls.Add(this.display1);
+            this.Controls.Add(this.displayControl1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
@@ -230,6 +225,8 @@
             this.MaximizeBox = false;
             this.Name = "VMForm";
             this.Text = "OpenComputer Virtual Machine - {vmName}";
+            this.Load += new System.EventHandler(this.VMForm_Load);
+            this.Shown += new System.EventHandler(this.VMForm_Shown);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
@@ -259,7 +256,7 @@
         private System.Windows.Forms.ToolStripStatusLabel status;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripButton configure;
-        private Core.Display display1;
+        private Core.DisplayControl displayControl1;
     }
 }
 

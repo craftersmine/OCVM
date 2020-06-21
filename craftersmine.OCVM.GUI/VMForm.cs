@@ -20,36 +20,43 @@ namespace craftersmine.OCVM.GUI
         private TimeSpan frameTime = TimeSpan.Zero;
         private Dictionary<string, StatusIcon> statusIcons = new Dictionary<string, StatusIcon>();
         private Timer resetTimer = new Timer();
+        VM vm = new VM();
 
         public VMForm(Tier displayTier)
         {
             InitializeComponent();
             resetTimer.Interval = 20;
             resetTimer.Tick += ResetTimer_Tick;
-            display1.SetTier(displayTier);
+            //display1.SetTier(displayTier);
             LuaApi.DisplayOutput += LuaApi_DisplayOutput;
             LuaApi.DisplayScroll += LuaApi_DisplayScroll;
             LuaApi.DisplayCursorPositionChange += LuaApi_DisplayCursorPositionChange;
-            display1.DisplayRedrawn += Display1_DisplayRedrawn;
-            display1.EnableCursor = true;
-            VM vm = new VM();
+            //display1.DisplayRedrawn += Display1_DisplayRedrawn;
+            //display1.EnableCursor = true;
             VMEvents.DiskActivity += VMEvents_DiskActivity;
             VMEvents.VMReady += VMEvents_VMLaunched;
             VMEvents.VMStateChanged += VMEvents_VMStateChanged;
-            vm.Initialize(display1);
+            displayControl1.SetTier(Tier.Advanced);
+        }
+
+        private void Instance_ScreenBufferInitialized(object sender, EventArgs e)
+        {
         }
 
         private void VMEvents_VMStateChanged(object sender, VMStateChangedEventArgs e)
         {
-            if (e.State == VMState.Rebooting || e.State == VMState.Stopped || e.State == VMState.Stopping)
-                display1.ClearScreenBuffer();
+           // if (e.State == VMState.Rebooting || e.State == VMState.Stopped || e.State == VMState.Stopping)
+                //display1.ClearScreenBuffer();
         }
 
         private void VMEvents_VMLaunched(object sender, EventArgs e)
         {
             CreateStatusIcons();
+            ScreenBuffer.Instance.Begin();
+            ScreenBuffer.Instance.ClearColor = BaseColors.Black;
+            ScreenBuffer.Instance.Clear();
+            ScreenBuffer.Instance.End();
             resetTimer.Start();
-            VM.RunningVM.Run();
         }
 
         private void CreateStatusIcons()
@@ -96,20 +103,20 @@ namespace craftersmine.OCVM.GUI
 
         private void LuaApi_DisplayCursorPositionChange(object sender, DisplayCursorPositionEventArgs e)
         {
-            display1.SetCursorPosition(e.X, e.Y);
+            //display1.SetCursorPosition(e.X, e.Y);
         }
 
         private void LuaApi_DisplayScroll(object sender, EventArgs e)
         {
-            display1.ScrollScreenBuffer();
+            //display1.ScrollScreenBuffer();
         }
 
         private void LuaApi_DisplayOutput(object sender, DisplayOutputEventArgs e)
         {
-            if (e.UseDefaultColors)
-                display1.PlaceString(e.Position.X, e.Position.Y, e.StringValue, display1.ForeColor, display1.BackColor);
-            else display1.PlaceString(e.Position.X, e.Position.Y, e.StringValue, e.Foreground, e.Background);
-            display1.Redraw();
+            //if (e.UseDefaultColors)
+                //display1.PlaceString(e.Position.X, e.Position.Y, e.StringValue, display1.ForeColor, display1.BackColor);
+            //else display1.PlaceString(e.Position.X, e.Position.Y, e.StringValue, e.Foreground, e.Background);
+            //display1.Redraw();
         }
 
         private void Display1_SizeChanged(object sender, EventArgs e)
@@ -121,21 +128,21 @@ namespace craftersmine.OCVM.GUI
 
         private void Button1_Click(object sender, EventArgs e)
         {
-            switch (t)
-            {
-                case Tier.Base:
-                    t = Tier.Medium;
-                    display1.SetTier(t);
-                    break;
-                case Tier.Medium:
-                    t = Tier.Base;
-                    display1.SetTier(t);
-                    break;
-                case Tier.Advanced:
-                    t = Tier.Base;
-                    display1.SetTier(t);
-                    break;
-            }
+            //switch (t)
+            //{
+            //    case Tier.Base:
+            //        t = Tier.Medium;
+            //        display1.SetTier(t);
+            //        break;
+            //    case Tier.Medium:
+            //        t = Tier.Base;
+            //        display1.SetTier(t);
+            //        break;
+            //    case Tier.Advanced:
+            //        t = Tier.Base;
+            //        display1.SetTier(t);
+            //        break;
+            //}
         }
 
         int curPosX = 0;
@@ -143,40 +150,40 @@ namespace craftersmine.OCVM.GUI
 
         private void VMForm_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (!char.IsControl(e.KeyChar))
-            {
-                if (curPosX < display1.DisplayWidth)
-                {
-                    display1.SetScreenBufferData(curPosX, curPosY, new DisplayChar(e.KeyChar, display1.ForeColor, display1.BackColor));
-                    curPosX++;
-                }
-                else
-                {
-                    curPosX = 0;
-                    curPosY++;
-                    if (curPosY > display1.DisplayHeight)
-                        curPosY = 0;
-                }
-            }
-            else
-            {
-                if (e.KeyChar == (char)Keys.Back)
-                {
-                    if (curPosX >= 0 && curPosX <= display1.DisplayWidth)
-                    {
-                        display1.SetScreenBufferData(curPosX, curPosY, new DisplayChar(' ', display1.ForeColor, display1.BackColor));
-                        curPosX--;
-                    }
-                    else
-                    {
-                        curPosX = 0;
-                        curPosY--;
-                        if (curPosY <= 0)
-                            curPosY = 0;
-                    }
-                }
-            }
-            display1.Redraw();
+            //if (!char.IsControl(e.KeyChar))
+            //{
+            //    if (curPosX < display1.DisplayWidth)
+            //    {
+            //        display1.SetScreenBufferData(curPosX, curPosY, new DisplayChar(e.KeyChar, display1.ForeColor, display1.BackColor));
+            //        curPosX++;
+            //    }
+            //    else
+            //    {
+            //        curPosX = 0;
+            //        curPosY++;
+            //        if (curPosY > display1.DisplayHeight)
+            //            curPosY = 0;
+            //    }
+            //}
+            //else
+            //{
+            //    if (e.KeyChar == (char)Keys.Back)
+            //    {
+            //        if (curPosX >= 0 && curPosX <= display1.DisplayWidth)
+            //        {
+            //            display1.SetScreenBufferData(curPosX, curPosY, new DisplayChar(' ', display1.ForeColor, display1.BackColor));
+            //            curPosX--;
+            //        }
+            //        else
+            //        {
+            //            curPosX = 0;
+            //            curPosY--;
+            //            if (curPosY <= 0)
+            //                curPosY = 0;
+            //        }
+            //    }
+            //}
+            //display1.Redraw();
         }
 
         private void Restart_Click(object sender, EventArgs e)
@@ -224,6 +231,16 @@ namespace craftersmine.OCVM.GUI
                 statusIcons.Add(statusIcon.Id, statusIcon);
             else throw new Exception("Status icon exists! " + statusIcon.Id);
             return statusIcon.ToolStripStatusLabel;
+        }
+
+        private void VMForm_Load(object sender, EventArgs e)
+        {
+        }
+
+        private void VMForm_Shown(object sender, EventArgs e)
+        {
+            vm.Initialize(displayControl1);
+            VM.RunningVM.Run();
         }
     }
 }
