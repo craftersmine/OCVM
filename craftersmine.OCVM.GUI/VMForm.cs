@@ -36,7 +36,7 @@ namespace craftersmine.OCVM.GUI
             VMEvents.DiskActivity += VMEvents_DiskActivity;
             VMEvents.VMReady += VMEvents_VMLaunched;
             VMEvents.VMStateChanged += VMEvents_VMStateChanged;
-            displayControl1.SetTier(Tier.Advanced);
+            displayControl1.SetTier(Tier.Base);
         }
 
         private void Instance_ScreenBufferInitialized(object sender, EventArgs e)
