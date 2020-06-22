@@ -45,9 +45,19 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
                 Console.WriteLine(combined);
                 ScreenBuffer.Instance.Begin();
                 //LuaApi.InvokeDisplayOutput(new DisplayOutputEventArgs() { UseDefaultColors = true, StringValue = combined, Position = VM.RunningVM.Display.CursorPosition });
-                for (int i = 0; i < combined.Length; i++)
+                if (combined.Length > ScreenBuffer.Instance.Width)
                 {
-                    ScreenBuffer.Instance.Set(i, VM.RunningVM.Display.CursorPosition.Y, combined[i], BaseColors.White, BaseColors.Black);
+                    for (int i = 0; i < combined.Length / ScreenBuffer.Instance.Width; i++)
+                    {
+                        print(combined.Substring(i * ScreenBuffer.Instance.Width, ScreenBuffer.Instance.Width));
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < combined.Length; i++)
+                    {
+                        ScreenBuffer.Instance.Set(i, VM.RunningVM.Display.CursorPosition.Y, combined[i], BaseColors.White, BaseColors.Black);
+                    }
                 }
                 ScreenBuffer.Instance.End();
                 if (displayCursorY == VM.RunningVM.Display.DisplayHeight - 1)
