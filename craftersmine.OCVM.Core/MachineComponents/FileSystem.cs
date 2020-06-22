@@ -20,6 +20,9 @@ namespace craftersmine.OCVM.Core.MachineComponents
         public string HostFolderPath { get { return hostFolderPath; } }
         public string FileSystemRootPath { get { return Path.Combine(hostFolderPath, "storage\\"); } }
         public string MetadataFilePath { get { return Path.Combine(hostFolderPath, "ocvm.filesystem.metadata"); } }
+        public string FSLabel { get; private set; } = "";
+        public object IsReadOnly { get; private set; } = false;
+
         private FileSystem() : base() 
         {
         }
@@ -44,11 +47,24 @@ namespace craftersmine.OCVM.Core.MachineComponents
             DeviceInfo.Description = "Filesystem";
         }
 
+        public void SaveMeta()
+        {
+            string[] metadataToRestore = {
+                "version=1",
+                "filesystem.address=" + Address,
+                "filesystem.label=" + FSLabel,
+                "filesystem.isReadOnly=" + IsReadOnly.ToString()
+            }; 
+            File.WriteAllLines(MetadataFilePath, metadataToRestore);
+        }
+
         public string RestoreFileSystem()
         {
             string[] metadataToRestore = {
                 "version=1",
-                "filesystem.address=" + Address
+                "filesystem.address=" + Address,
+                "filesystem.label=" + FSLabel,
+                "filesystem.isReadOnly=" + IsReadOnly.ToString()
             };
 
             string retrievedAddress = "";
@@ -65,26 +81,42 @@ namespace craftersmine.OCVM.Core.MachineComponents
             else
             {
                 bool isNeededRestore = false;
+                bool isLabelExists = false;
                 string[] existantData = File.ReadAllLines(MetadataFilePath);
                 foreach (var ln in existantData)
                 {
                     string[] separated = ln.Split('=');
                     if (separated.Length > 1)
-                        switch (separated[0])
+                    {
+                        if (separated[0] != "filesystem.label")
                         {
-                            case "version":
-                                if (separated[1] != "1")
-                                    isNeededRestore = true;
-                                break;
-                            case "filesystem.address":
-                                if (!Guid.TryParse(separated[1], out Guid addr))
-                                    isNeededRestore = true;
-                                else retrievedAddress = separated[1];
-                                break;
+                            switch (separated[0])
+                            {
+                                case "version":
+                                    if (separated[1] != "1")
+                                        isNeededRestore = true;
+                                    break;
+                                case "filesystem.address":
+                                    if (!Guid.TryParse(separated[1], out Guid addr))
+                                        isNeededRestore = true;
+                                    else retrievedAddress = separated[1];
+                                    break;
+                                case "filesystem.isReadOnly":
+                                    if (!bool.TryParse(separated[1], out bool isRO))
+                                        isNeededRestore = true;
+                                    else IsReadOnly = isRO;
+                                    break;
+                            }
                         }
+                        else
+                        {
+                            FSLabel = separated[1];
+                            isLabelExists = true;
+                        }
+                    }
                     else isNeededRestore = true;
                 }
-                if (isNeededRestore)
+                if (isNeededRestore || !isLabelExists)
                 {
                     File.WriteAllLines(MetadataFilePath, metadataToRestore);
                     return Address;
@@ -190,6 +222,165 @@ namespace craftersmine.OCVM.Core.MachineComponents
             if (handle == null)
                 return new object[] { null, OCErrors.BadFileDescriptor };
             return handle.write(data);
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public object[] seek(FileSystemHandle handle, string whence, int offset)
+        {
+            return handle.seek(whence, offset);
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public void close(FileSystemHandle handle)
+        {
+            handle.close();
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public string getLabel()
+        {
+            if (FSLabel.IsNullEmptyOrWhitespace())
+                return null;
+            return FSLabel;
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public string setLabel(string value)
+        {
+            FSLabel = value;
+            if (value == null)
+                FSLabel = value;
+            else FSLabel = value;
+            SaveMeta();
+            return getLabel();
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public long spaceUsed()
+        {
+            DriveInfo drive = new DriveInfo(HostFolderPath[0].ToString());
+            return drive.AvailableFreeSpace;
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public long spaceTotal()
+        {
+            DriveInfo drive = new DriveInfo(HostFolderPath[0].ToString());
+            return drive.TotalSize;
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public bool makeDirectory(string path)
+        {
+            string p = GetPath(path);
+            try
+            {
+                var dir = Directory.CreateDirectory(p);
+                if (dir != null)
+                    return true;
+            }
+            catch
+            {
+                return false;
+            }
+            return false;
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public bool exists(string path)
+        {
+            if (isDirectory(path))
+                return true;
+            else
+            {
+                return File.Exists(GetPath(path));
+            }
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public bool isDirectory(string path)
+        {
+            try
+            {
+                FileAttributes attributes = File.GetAttributes(GetPath(path));
+                if (attributes.HasFlag(FileAttributes.Directory))
+                    return true;
+                else return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public bool rename(string from, string to)
+        {
+            try
+            {
+                if (exists(from))
+                {
+                    File.Move(GetPath(from), GetPath(to));
+                    if (exists(to))
+                        return true;
+                    else return false;
+                }
+                else return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public LuaTable list(string path)
+        {
+            DirectoryInfo dirInfo = new DirectoryInfo(GetPath(path));
+            var files = dirInfo.GetFiles();
+            var dirs = dirInfo.GetDirectories();
+            List<string> objects = new List<string>();
+
+            LuaTable table = VM.RunningVM.ExecModule.CreateTable();
+            foreach (var file in files)
+            {
+                objects.Add(file.FullName.Replace(HostFolderPath, "").Replace(Path.DirectorySeparatorChar.ToString(), "/"));
+            }
+            foreach (var dir in dirs)
+            {
+                objects.Add(dir.FullName.Replace(HostFolderPath, "").Replace(Path.DirectorySeparatorChar.ToString(), "/"));
+            }
+            objects.Sort();
+            return objects.ToLuaTable();
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public int lastModified(string path)
+        {
+            if (exists(path))
+                return File.GetLastWriteTimeUtc(GetPath(path)).Second;
+            return 0;
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public bool remove(string path)
+        {
+            if (exists(path))
+            {
+                File.Delete(GetPath(path));
+                if (!exists(path))
+                    return true;
+                else return false;
+            }
+            else return false;
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public long size(string path)
+        {
+            if (exists(path))
+                return new FileInfo(GetPath(path)).Length;
+            else return 0;
         }
 
         #endregion
