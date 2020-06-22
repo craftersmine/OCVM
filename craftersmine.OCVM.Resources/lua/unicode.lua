@@ -11,10 +11,16 @@ function unicode.char(value, ...)
 	end;
 end;
 
-function unicode.charWidth(value)
-	if type(value) == "string" and value ~= nil then
-		return Unicode.charWidth(value);
-	else return nil end;
+function unicode.charWidth(value, ...)
+	return Unicode.charWidth(tostring(value))
+end
+
+function unicode.isWide(value, ...)
+	return Unicode.isWide(tostring(value));
+end
+
+function unicode.len(value)
+	return Unicode.len(tostring(value));
 end
 
 return unicode;
