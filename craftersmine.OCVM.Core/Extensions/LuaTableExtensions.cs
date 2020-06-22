@@ -60,5 +60,17 @@ namespace craftersmine.OCVM.Core.Extensions
                 return table.GetValuesAsList().ToArray();
             else return null;
         }
+
+        public static LuaTable ToLuaTable<T>(this List<T> list)
+        {
+            LuaTable table = VM.RunningVM.ExecModule.CreateTable();
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                table[i] = list[i];
+            }
+
+            return table;
+        }
     }
 }
