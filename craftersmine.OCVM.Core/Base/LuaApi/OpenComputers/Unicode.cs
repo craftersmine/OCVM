@@ -35,5 +35,17 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
             char chr = _char[0];
             return Encoding.UTF8.GetByteCount(chr.ToString());
         }
+
+        public static bool isWide(string _char)
+        {
+            if (charWidth(_char) > 1)
+                return true;
+            else return false;
+        }
+
+        public static int len(string str)
+        {
+            return Encoding.UTF8.GetCharCount(Encoding.UTF8.GetBytes(str));
+        }
     }
 }
