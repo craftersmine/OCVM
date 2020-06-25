@@ -46,9 +46,11 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.status = new System.Windows.Forms.ToolStripStatusLabel();
             this.displayControl1 = new craftersmine.OCVM.Core.DisplayControl();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -58,7 +60,7 @@
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(508, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(550, 24);
             this.menuStrip1.TabIndex = 3;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -139,7 +141,7 @@
             this.configure});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(508, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(550, 25);
             this.toolStrip1.TabIndex = 4;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -182,10 +184,10 @@
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.status});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 306);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 342);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.ShowItemToolTips = true;
-            this.statusStrip1.Size = new System.Drawing.Size(508, 24);
+            this.statusStrip1.Size = new System.Drawing.Size(550, 24);
             this.statusStrip1.TabIndex = 5;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -195,44 +197,57 @@
             this.status.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
             this.status.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.status.Name = "status";
-            this.status.Size = new System.Drawing.Size(493, 19);
+            this.status.Size = new System.Drawing.Size(535, 19);
             this.status.Spring = true;
             this.status.Text = "{status}";
             this.status.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // displayControl1
             // 
+            this.displayControl1.AutoSize = true;
             this.displayControl1.CursorPosition = new System.Drawing.Point(0, 0);
             this.displayControl1.DrawCharacterCells = false;
-            this.displayControl1.Location = new System.Drawing.Point(0, 52);
+            this.displayControl1.Location = new System.Drawing.Point(0, 0);
             this.displayControl1.MinimumSize = new System.Drawing.Size(1, 1);
             this.displayControl1.Name = "displayControl1";
-            this.displayControl1.Size = new System.Drawing.Size(508, 251);
-            this.displayControl1.TabIndex = 6;
+            this.displayControl1.Size = new System.Drawing.Size(550, 287);
+            this.displayControl1.TabIndex = 7;
+            // 
+            // panel1
+            // 
+            this.panel1.AutoScroll = true;
+            this.panel1.Controls.Add(this.displayControl1);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel1.Location = new System.Drawing.Point(0, 49);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(550, 293);
+            this.panel1.TabIndex = 8;
+            this.panel1.SizeChanged += new System.EventHandler(this.VMForm_SizeChanged);
             // 
             // VMForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(508, 330);
-            this.Controls.Add(this.displayControl1);
+            this.AutoScroll = true;
+            this.ClientSize = new System.Drawing.Size(550, 366);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MainMenuStrip = this.menuStrip1;
-            this.MaximizeBox = false;
             this.Name = "VMForm";
             this.Text = "OpenComputer Virtual Machine - {vmName}";
-            this.Load += new System.EventHandler(this.VMForm_Load);
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Shown += new System.EventHandler(this.VMForm_Shown);
+            this.SizeChanged += new System.EventHandler(this.VMForm_SizeChanged);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -257,6 +272,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripButton configure;
         private Core.DisplayControl displayControl1;
+        private System.Windows.Forms.Panel panel1;
     }
 }
 
