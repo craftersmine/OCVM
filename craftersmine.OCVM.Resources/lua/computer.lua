@@ -26,14 +26,14 @@ function computer.uptime()
 end
 
 function computer.tmpAddress()
-	return "";
+	return Computer.tmpAddress();
 end
 
-function computer.getFreeMemory()
+function computer.freeMemory()
 	return Computer.getFreeMemory();
 end
 
-function computer.getTotalMemory()
+function computer.totalMemory()
 	return Computer.getTotalMemory();
 end
 
