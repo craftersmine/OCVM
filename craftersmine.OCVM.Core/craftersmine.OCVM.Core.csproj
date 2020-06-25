@@ -107,7 +107,9 @@
     <Compile Include="MachineComponents\DeviceInfo.cs" />
     <Compile Include="MachineComponents\EEPROM.cs" />
     <Compile Include="MachineComponents\FileSystem.cs" />
+    <Compile Include="MachineComponents\GPU.cs" />
     <Compile Include="MachineComponents\IComponent.cs" />
+    <Compile Include="MachineComponents\Screen.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
