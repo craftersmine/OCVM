@@ -34,6 +34,8 @@ namespace craftersmine.OCVM.Core
             Display = display;
             DeviceBus.ConnectDevice(new Computer(Guid.NewGuid().ToString()));
             DeviceBus.ConnectDevice(MachineComponents.FileSystem.MountFileSystem("D:\\OCVMDrives\\d\\"));
+            DeviceBus.ConnectDevice(new Screen(display.Tier) { Address = Guid.Empty.ToString() });
+            DeviceBus.ConnectDevice(new GPU());
             if (EEPROM.LoadEEPROMFromFile("LuaBios.lua" , out EEPROM eeprom))
             {
                 DeviceBus.ConnectDevice(eeprom);
