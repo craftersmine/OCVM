@@ -135,7 +135,7 @@ function component.fields(address)
 	end
 end
 
-function component.get(address, componentType)
+function component.get__(address, componentType)
 	if address == nil then address = ''; end;
 	if componentType == nil then componentType = ''; end;
 
@@ -147,7 +147,7 @@ function component.get(address, componentType)
 	end
 end
 
-function component.isAvailable(componentType)
+function component.isAvailable__(componentType)
 	if componentType == nil then componentType = '' end;
 	return Component.isAvailable(componentType);
 end
