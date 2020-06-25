@@ -67,7 +67,7 @@ namespace craftersmine.OCVM.Core.Extensions
 
             for (int i = 0; i < list.Count; i++)
             {
-                table[i] = list[i];
+                table[i + 1] = list[i];
             }
 
             return table;
