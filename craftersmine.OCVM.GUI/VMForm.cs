@@ -5,10 +5,7 @@ using craftersmine.OCVM.Core.MachineComponents;
 using craftersmine.OCVM.GUI.Properties;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -25,6 +22,7 @@ namespace craftersmine.OCVM.GUI
         public VMForm(Tier displayTier)
         {
             InitializeComponent();
+            new ScreenBufferManager();
             resetTimer.Interval = 20;
             resetTimer.Tick += ResetTimer_Tick;
             //display1.SetTier(displayTier);
@@ -36,7 +34,7 @@ namespace craftersmine.OCVM.GUI
             VMEvents.DiskActivity += VMEvents_DiskActivity;
             VMEvents.VMReady += VMEvents_VMLaunched;
             VMEvents.VMStateChanged += VMEvents_VMStateChanged;
-            displayControl1.SetTier(Tier.Base);
+            displayControl1.SetTier(Tier.Advanced);
         }
 
         private void Instance_ScreenBufferInitialized(object sender, EventArgs e)
@@ -51,11 +49,12 @@ namespace craftersmine.OCVM.GUI
 
         private void VMEvents_VMLaunched(object sender, EventArgs e)
         {
+            var buffer = ScreenBufferManager.Instance.GetBuffer(0);
             CreateStatusIcons();
-            ScreenBuffer.Instance.Begin();
-            ScreenBuffer.Instance.ClearColor = BaseColors.Black;
-            ScreenBuffer.Instance.Clear();
-            ScreenBuffer.Instance.End();
+            buffer.Begin();
+            buffer.ClearColor = BaseColors.Black;
+            buffer.Clear();
+            buffer.End();
             resetTimer.Start();
         }
 
@@ -233,14 +232,27 @@ namespace craftersmine.OCVM.GUI
             return statusIcon.ToolStripStatusLabel;
         }
 
-        private void VMForm_Load(object sender, EventArgs e)
-        {
-        }
-
         private void VMForm_Shown(object sender, EventArgs e)
         {
             vm.Initialize(displayControl1);
             VM.RunningVM.Run();
+        }
+
+        private void displayControl1_SizeChanged(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void VMForm_SizeChanged(object sender, EventArgs e)
+        {
+            displayControl1.Redraw();
+            Point panelCenter = new Point(panel1.ClientSize.Width / 2, panel1.ClientSize.Height / 2);
+            panel1.AutoScrollPosition = panelCenter;
+            Point dispCenter = new Point(displayControl1.ClientSize.Width / 2, displayControl1.ClientSize.Height / 2);
+            Point pos = new Point(panelCenter.X - dispCenter.X, panelCenter.Y - dispCenter.Y);
+            panel1.HorizontalScroll.Value = panel1.HorizontalScroll.Maximum / 2;
+            panel1.VerticalScroll.Value = panel1.VerticalScroll.Maximum / 2;
+            //displayControl1.Location = pos;
         }
     }
 }
