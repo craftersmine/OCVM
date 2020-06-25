@@ -19,7 +19,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
 
         public static string tmpAddress()
         {
-            return Guid.Empty.ToString();
+            return null;
         }
         
         public static void beep(float freq, float duration)
