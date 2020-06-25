@@ -1,11 +1,67 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace craftersmine.OCVM.Core.Base
 {
+    public sealed class ScreenBufferManager
+    {
+        private Dictionary<int, ScreenBuffer> buffers = new Dictionary<int, ScreenBuffer>();
+
+        public static ScreenBufferManager Instance { get; private set; }
+
+        public int AllocatedBuffersCount { get { return buffers.Count; } }
+
+        public ScreenBufferManager()
+        {
+            Instance = this;
+        }
+
+        public void CreateBuffer(int index, int width, int height)
+        {
+            ScreenBuffer buffer = new ScreenBuffer(width, height);
+            buffers.Add(index, buffer);
+        }
+
+        public bool FreeBuffer(int index)
+        {
+            if (buffers.ContainsKey(index))
+            {
+                if (buffers[index].IsChanging)
+                {
+                    buffers[index].End();
+                }
+                buffers.Remove(index);
+                return true;
+            }
+            else return false;
+        }
+
+        public int[] GetAllocatedBuffers()
+        {
+            return buffers.Keys.ToArray();
+        }
+
+        public void FreeAllBuffers()
+        {
+            foreach (var buffer in buffers)
+            {
+                if (buffer.Key != 0)
+                    FreeBuffer(buffer.Key);
+            }
+        }
+
+        public ScreenBuffer GetBuffer(int index)
+        {
+            if (buffers.ContainsKey(index))
+                return buffers[index];
+            else return null;
+        }
+    }
+
     public sealed class ScreenBuffer
     {
         public DisplayChar[,] Buffer { get; private set; }

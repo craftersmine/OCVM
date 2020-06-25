@@ -29,40 +29,42 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
                 }
             }
 
+            var buffer = ScreenBufferManager.Instance.GetBuffer(0);
+
             if (combined == null)
             {
                 Console.WriteLine("nil");
                 //LuaApi.InvokeDisplayOutput(new DisplayOutputEventArgs() { UseDefaultColors = true, StringValue = "nil", Position = VM.RunningVM.Display.CursorPosition });
                 for (int i = 0; i < 3; i++)
                 {
-                    ScreenBuffer.Instance.Begin();
-                    ScreenBuffer.Instance.Set(i, VM.RunningVM.Display.CursorPosition.Y, "nil"[i], BaseColors.White, BaseColors.Black);
-                    ScreenBuffer.Instance.End();
+                    buffer.Begin();
+                    buffer.Set(i, VM.RunningVM.Display.CursorPosition.Y, "nil"[i], BaseColors.White, BaseColors.Black);
+                    buffer.End();
                 }
             }
             else
             {
                 Console.WriteLine(combined);
-                ScreenBuffer.Instance.Begin();
+                buffer.Begin();
                 //LuaApi.InvokeDisplayOutput(new DisplayOutputEventArgs() { UseDefaultColors = true, StringValue = combined, Position = VM.RunningVM.Display.CursorPosition });
-                if (combined.Length > ScreenBuffer.Instance.Width)
+                if (combined.Length > buffer.Width)
                 {
-                    for (int i = 0; i < combined.Length / ScreenBuffer.Instance.Width; i++)
+                    for (int i = 0; i < combined.Length / buffer.Width; i++)
                     {
-                        print(combined.Substring(i * ScreenBuffer.Instance.Width, ScreenBuffer.Instance.Width));
+                        print(combined.Substring(i * buffer.Width, buffer.Width));
                     }
                 }
                 else
                 {
                     for (int i = 0; i < combined.Length; i++)
                     {
-                        ScreenBuffer.Instance.Set(i, VM.RunningVM.Display.CursorPosition.Y, combined[i], BaseColors.White, BaseColors.Black);
+                        buffer.Set(i, VM.RunningVM.Display.CursorPosition.Y, combined[i], BaseColors.White, BaseColors.Black);
                     }
                 }
-                ScreenBuffer.Instance.End();
+                buffer.End();
                 if (displayCursorY == VM.RunningVM.Display.DisplayHeight - 1)
                 {
-                    ScreenBuffer.Instance.Scroll();
+                    buffer.Scroll();
                 }
                 else
                 {
@@ -94,6 +96,11 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
         public static void breakpoint(object data)
         {
             print("OCVM_INTERNAL_LUA_BREAKPOINT_HIT: " + data);
+        }
+
+        public static void LogConsole(string data)
+        {
+            Console.WriteLine(data);
         }
     }
 }

@@ -21,6 +21,8 @@ namespace craftersmine.OCVM.Core
         public SizeF CharSize { get; private set; }
         public Point CursorPosition { get; set; }
         public bool DrawCharacterCells { get; set; } = false;
+        public Tier Tier { get; private set; }
+        public ScreenBuffer ScreenBuffer { get { return ScreenBufferManager.Instance.GetBuffer(0); } }
 
         public DisplayControl()
         {
@@ -33,15 +35,15 @@ namespace craftersmine.OCVM.Core
             {
                 case Tier.Base:
                     SetDisplaySize(50, 16);
-                    //this.tier = Tier.Base;
+                    this.Tier = Tier.Base;
                     break;
                 case Tier.Medium:
                     SetDisplaySize(80, 25);
-                    //this.tier = Tier.Medium;
+                    this.Tier = Tier.Medium;
                     break;
                 case Tier.Advanced:
                     SetDisplaySize(160, 50);
-                    //this.tier = Tier.Advanced;
+                    this.Tier = Tier.Advanced;
                     break;
             }
         }
@@ -49,8 +51,8 @@ namespace craftersmine.OCVM.Core
         private void VMEvents_VMReady(object sender, EventArgs e)
         {
             //ScreenBuffer.CreateScreenBufferInstance();
-            ScreenBuffer.Instance.ScreenBufferChanged += Instance_ScreenBufferChanged;
-            ScreenBuffer.Instance.ScreenBufferCleared += Instance_ScreenBufferCleared;
+            ScreenBufferManager.Instance.GetBuffer(0).ScreenBufferChanged += Instance_ScreenBufferChanged;
+            ScreenBufferManager.Instance.GetBuffer(0).ScreenBufferCleared += Instance_ScreenBufferCleared;
         }
 
         private void Instance_ScreenBufferCleared(object sender, EventArgs e)
@@ -74,46 +76,51 @@ namespace craftersmine.OCVM.Core
             InitializeFont();
             DisplayWidth = width;
             DisplayHeight = height;
-            if (ScreenBuffer.Instance == null)
+            if (ScreenBufferManager.Instance.GetBuffer(0) == null)
             {
-                ScreenBuffer.CreateScreenBufferInstance();
+                ScreenBufferManager.Instance.CreateBuffer(0, DisplayWidth, DisplayHeight);
             }
-            ScreenBuffer.Instance.Initialize(DisplayWidth, DisplayHeight);
+            ScreenBufferManager.Instance.GetBuffer(0).Initialize(DisplayWidth, DisplayHeight);
             CharSize = RazorGFX.MeasureString(" ", Font);
             CharSize = new SizeF(8f, 16f);
             //CharSize = RazorGFX.MeasureString(" ", Font, 16, new StringFormat(StringFormatFlags.NoFontFallback | StringFormatFlags.DisplayFormatControl));
-            Size measuredSize = new Size((int)CharSize.Width * ScreenBuffer.Instance.Width, (int)CharSize.Height * ScreenBuffer.Instance.Height);
+            Size measuredSize = new Size((int)CharSize.Width * ScreenBuffer.Width, (int)CharSize.Height * ScreenBuffer.Height);
+            Padding = Padding.Empty;
+            Margin = Padding.Empty;
             ClientSize = measuredSize;
             Redraw();
         }
 
         public void Redraw()
         {
-            lock (RazorLock)
+            if (ScreenBuffer != null)
             {
-                using (var bmp = new Bitmap(ClientSize.Width, ClientSize.Height))
+                lock (RazorLock)
                 {
-                    using (var g = Graphics.FromImage(bmp))
+                    using (var bmp = new Bitmap(ClientSize.Width, ClientSize.Height))
                     {
-                        g.RenderingOrigin = new Point(0, 0);
-                        for (int x = 0; x < ScreenBuffer.Instance.Width; x++)
+                        using (var g = Graphics.FromImage(bmp))
                         {
-                            for (int y = 0; y < ScreenBuffer.Instance.Height; y++)
+                            g.RenderingOrigin = new Point(0, 0);
+                            for (int x = 0; x < ScreenBuffer.Width; x++)
                             {
-                                var chr = ScreenBuffer.Instance.Get(x, y);
-                                float xPos = CharSize.Width * (float)x;
-                                float yPos = CharSize.Height * (float)y;
-                                var chrRect = new RectangleF(xPos, yPos, CharSize.Width, CharSize.Height);
-                                g.FillRectangle(new SolidBrush(chr.BackgroundColor), chrRect);
-                                g.DrawString(chr.ToString(), Font, new SolidBrush(chr.ForegroundColor), chrRect.X - 3, chrRect.Y);
-                                if (DrawCharacterCells)
-                                    g.DrawRectangle(Pens.Red, chrRect.X, chrRect.Y, chrRect.Width, chrRect.Height);
+                                for (int y = 0; y < ScreenBuffer.Height; y++)
+                                {
+                                    var chr = ScreenBuffer.Get(x, y);
+                                    float xPos = CharSize.Width * (float)x;
+                                    float yPos = CharSize.Height * (float)y;
+                                    var chrRect = new RectangleF(xPos, yPos, CharSize.Width, CharSize.Height);
+                                    g.FillRectangle(new SolidBrush(chr.BackgroundColor), chrRect);
+                                    g.DrawString(chr.ToString(), Font, new SolidBrush(chr.ForegroundColor), chrRect.X - 3, chrRect.Y);
+                                    if (DrawCharacterCells)
+                                        g.DrawRectangle(Pens.Red, chrRect.X, chrRect.Y, chrRect.Width, chrRect.Height);
+                                }
                             }
                         }
+                        RazorGFX.DrawImage(bmp, Point.Empty);
                     }
-                    RazorGFX.DrawImage(bmp, Point.Empty);
+                    RazorPaint();
                 }
-                RazorPaint();
             }
         }
     }

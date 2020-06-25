@@ -34,6 +34,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
 
         private void Env_DebugHook(object sender, NLua.Event.DebugHookEventArgs e)
         {
+            Root.LogConsole("LUAEXEC: " + e.LuaDebug.CurrentLine + " SRC: " + e.LuaDebug.Name + " IN " + e.LuaDebug.ShortSource);
             if (abort)
             {
                 Lua lState = (Lua)sender;
@@ -43,30 +44,31 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
 
         private void PrintException(Exception e)
         {
-            ScreenBuffer.Instance.Begin();
-            ScreenBuffer.Instance.ClearColor = BaseColors.Blue;
-            ScreenBuffer.Instance.Clear();
+            var buffer = ScreenBufferManager.Instance.GetBuffer(0);
+            buffer.Begin();
+            buffer.ClearColor = BaseColors.Blue;
+            buffer.Clear();
             Console.ForegroundColor = ConsoleColor.Red;
             string uerr = "Unrecoverable error";
-            int xPos1 = (ScreenBuffer.Instance.Width / 2) - (uerr.Length / 2);
-            int yPos1 = (ScreenBuffer.Instance.Height / 2) - 3;
+            int xPos1 = (buffer.Width / 2) - (uerr.Length / 2);
+            int yPos1 = (buffer.Height / 2) - 3;
             for (int i = 0; i < uerr.Length; i++)
             {
-                ScreenBuffer.Instance.Set(xPos1 + i, yPos1, uerr[i], BaseColors.White, BaseColors.Blue);
+                buffer.Set(xPos1 + i, yPos1, uerr[i], BaseColors.White, BaseColors.Blue);
             }
-            if (e.Message.Length > ScreenBuffer.Instance.Width)
+            if (e.Message.Length > buffer.Width)
             {
-                for (int i = 0; i <= e.Message.Length / ScreenBuffer.Instance.Width; i++)
+                for (int i = 0; i <= e.Message.Length / buffer.Width; i++)
                 {
                     string tmpStr = "";
-                    if (e.Message.Substring(i * ScreenBuffer.Instance.Width).Length >= ScreenBuffer.Instance.Width)
-                        tmpStr = e.Message.Substring(i * ScreenBuffer.Instance.Width, ScreenBuffer.Instance.Width);
-                    else tmpStr = e.Message.Substring(i * ScreenBuffer.Instance.Width);
-                    int xPos2 = (ScreenBuffer.Instance.Width / 2) - (tmpStr.Length / 2);
-                    int yPos2 = (ScreenBuffer.Instance.Height / 2) + i;
+                    if (e.Message.Substring(i * buffer.Width).Length >= buffer.Width)
+                        tmpStr = e.Message.Substring(i * buffer.Width, buffer.Width);
+                    else tmpStr = e.Message.Substring(i * buffer.Width);
+                    int xPos2 = (buffer.Width / 2) - (tmpStr.Length / 2);
+                    int yPos2 = (buffer.Height / 2) + i;
                     for (int j = 0; j < tmpStr.Length; j++)
                     {
-                        ScreenBuffer.Instance.Set(xPos2 + j, yPos2, tmpStr[j], BaseColors.White, BaseColors.Blue);
+                        buffer.Set(xPos2 + j, yPos2, tmpStr[j], BaseColors.White, BaseColors.Blue);
                     }
                 }
             }
@@ -74,12 +76,12 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             {
                 for (int i = 0; i < e.Message.Length; i++)
                 {
-                    int xPos2 = (ScreenBuffer.Instance.Width / 2) - (e.Message.Length / 2);
-                    int yPos2 = (ScreenBuffer.Instance.Height / 2);
-                    ScreenBuffer.Instance.Set(xPos2 + i, yPos2, e.Message[i], BaseColors.White, BaseColors.Blue);
+                    int xPos2 = (buffer.Width / 2) - (e.Message.Length / 2);
+                    int yPos2 = (buffer.Height / 2);
+                    buffer.Set(xPos2 + i, yPos2, e.Message[i], BaseColors.White, BaseColors.Blue);
                 }
             }
-            ScreenBuffer.Instance.End();
+            buffer.End();
             Console.WriteLine(e.Source);
             Console.WriteLine(e.Message);
             //VM.RunningVM.Display.SetColor(BaseColors.Black, BaseColors.White);
@@ -114,7 +116,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             return await Task<object[]>.Run(new Func<object[]>(() => {
                 try
                 {
-                    str = "import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.Base.LuaApi.OpenComputers');import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.MachineComponents');local component = require('component');local computer = require('computer');local std = require('stdlib');local unicode = require('unicode');_G['computer'] = computer;_G['component'] = component;_G['unicode'] = unicode;_G['checkArg'] = std.checkArg;_G['dofile'] = nil;\r\n" + str;
+                    str = "import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.Base.LuaApi.OpenComputers');import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.MachineComponents');local component = require('component');local computer = require('computer');local std = require('stdlib');local unicode = require('unicode');_G['computer'] = computer;_G['component'] = component;_G['unicode'] = unicode;_G['checkArg'] = std.checkArg;_G['dofile'] = nil;_G['loadfile'] = nil;\r\n" + str;
                     var code = env.LoadString(str, chunkName);
                     return code.Call();
                 }
@@ -127,10 +129,11 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
                     }
                     else if (ex.Message.Contains(OCErrors.MachineHalted))
                     {
-                        ScreenBuffer.Instance.Begin();
-                        ScreenBuffer.Instance.ClearColor = BaseColors.Black;
-                        ScreenBuffer.Instance.Clear();
-                        ScreenBuffer.Instance.End();
+                        var buffer = ScreenBufferManager.Instance.GetBuffer(0);
+                        buffer.Begin();
+                        buffer.ClearColor = BaseColors.Black;
+                        buffer.Clear();
+                        buffer.End();
                     }
                     else
                     {
