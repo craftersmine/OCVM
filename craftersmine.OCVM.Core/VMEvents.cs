@@ -1,4 +1,5 @@
-﻿using System;
+﻿using craftersmine.OCVM.Core.MachineComponents;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,7 @@ namespace craftersmine.OCVM.Core
     public sealed class VMEvents
     {
         public static event EventHandler<DiskActivityEventArgs> DiskActivity;
+        public static event EventHandler ScreenStateChanged;
         public static event EventHandler VMReady;
         public static event EventHandler<VMStateChangedEventArgs> VMStateChanged;
 
@@ -25,6 +27,11 @@ namespace craftersmine.OCVM.Core
         public static void OnDiskActivity(string fsAddress, DiskActivityType activityType)
         {
             DiskActivity?.Invoke(VM.RunningVM, new DiskActivityEventArgs() { FileSystemAddress = fsAddress, DiskActivityType = activityType });
+        }
+
+        public static void OnScreenStateChanged(Screen screen)
+        {
+            ScreenStateChanged?.Invoke(screen, EventArgs.Empty);
         }
     }
 
