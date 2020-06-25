@@ -171,8 +171,16 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
         {
             MachineComponents.Computer computer = VM.RunningVM.DeviceBus.GetPrimaryComponent("computer") as MachineComponents.Computer;
             Signal sig = computer.PullSignal();
-            data = sig.Data;
-            return sig.Name;
+            if (sig != null)
+            {
+                data = sig.Data;
+                return sig.Name;
+            }
+            else
+            {
+                data = null;
+                return null;
+            }
         } 
 
         public static void shutdown(bool reboot)
