@@ -302,7 +302,8 @@ namespace craftersmine.OCVM.Core.MachineComponents
         {
             try
             {
-                FileAttributes attributes = File.GetAttributes(GetPath(path));
+                var p = GetPath(path);
+                FileAttributes attributes = File.GetAttributes(p);
                 if (attributes.HasFlag(FileAttributes.Directory))
                     return true;
                 else return false;
@@ -344,11 +345,11 @@ namespace craftersmine.OCVM.Core.MachineComponents
             LuaTable table = VM.RunningVM.ExecModule.CreateTable();
             foreach (var file in files)
             {
-                objects.Add(file.FullName.Replace(HostFolderPath, "").Replace(Path.DirectorySeparatorChar.ToString(), "/"));
+                objects.Add(file.Name);
             }
             foreach (var dir in dirs)
             {
-                objects.Add(dir.FullName.Replace(HostFolderPath, "").Replace(Path.DirectorySeparatorChar.ToString(), "/"));
+                objects.Add(dir.Name);
             }
             objects.Sort();
             return objects.ToLuaTable();
@@ -432,6 +433,8 @@ namespace craftersmine.OCVM.Core.MachineComponents
                     string data = "";
                     if (FileStream.Position == FileStream.Length)
                         return new object[] { null, null };
+                    if (len > FileStream.Length - FileStream.Position)
+                        len = (int)FileStream.Length - (int)FileStream.Position;
                     for (int i = 0; i < len; i++)
                     {
                         data += Convert.ToChar((byte)FileStream.ReadByte());
