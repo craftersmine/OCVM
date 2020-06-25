@@ -65,7 +65,9 @@ namespace craftersmine.OCVM.Core.MachineComponents
 
         public Signal PullSignal()
         {
-            return signalQueue.Dequeue();
+            if (signalQueue.Count > 0)
+                return signalQueue.Dequeue();
+            else return null;
         }
     }
 
