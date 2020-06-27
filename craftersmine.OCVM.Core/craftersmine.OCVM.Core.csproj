@@ -95,6 +95,7 @@
     <Compile Include="DisplayControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Exceptions\EEPROMFailedToLoadException.cs" />
     <Compile Include="Exceptions\ExcededBusLanesException.cs" />
     <Compile Include="Exceptions\InvalidDeviceException.cs" />
     <Compile Include="Extensions\LuaTableExtensions.cs" />
