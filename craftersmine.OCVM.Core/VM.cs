@@ -9,6 +9,7 @@ using craftersmine.OCVM.Core.Base.LuaApi;
 using System.Reflection;
 using System.Threading;
 using craftersmine.OCVM.Core.Base;
+using craftersmine.OCVM.Core.Exceptions;
 
 namespace craftersmine.OCVM.Core
 {
@@ -33,13 +34,14 @@ namespace craftersmine.OCVM.Core
             DeviceBus = new DeviceBus(8);
             Display = display;
             DeviceBus.ConnectDevice(new Computer(Guid.NewGuid().ToString()));
-            DeviceBus.ConnectDevice(MachineComponents.FileSystem.MountFileSystem("D:\\OCVMDrives\\d\\"));
-            DeviceBus.ConnectDevice(new Screen(display.Tier) { Address = Guid.Empty.ToString() });
-            DeviceBus.ConnectDevice(new GPU());
-            if (EEPROM.LoadEEPROMFromFile("LuaBios.lua" , out EEPROM eeprom))
+            DeviceBus.ConnectDevice(FileSystem.MountFileSystem("D:\\OCVMDrives\\c\\"));
+            DeviceBus.ConnectDevice(new Screen(display.Tier));
+            DeviceBus.ConnectDevice(new GPU() { Address = Guid.Empty.ToString() });
+            if (EEPROM.LoadEEPROMFromFile("LuaBios.lua", out EEPROM eeprom))
             {
                 DeviceBus.ConnectDevice(eeprom);
             }
+            else throw new EEPROMFailedToLoadException();
             RunningVM = this;
             LaunchTime = DateTime.Now;
             VMEvents.OnVMReady();
