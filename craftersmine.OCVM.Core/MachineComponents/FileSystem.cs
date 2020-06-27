@@ -154,8 +154,16 @@ namespace craftersmine.OCVM.Core.MachineComponents
             if (handles.ContainsKey(handle.HandleId))
             {
                 handle.IsClosed = true;
+                handle.FileStream.Flush();
+                handle.FileStream.Close();
                 handles.Remove(handle.HandleId);
             }
+        }
+
+        public void CloseHandles()
+        {
+            for (int i = 0; i < handles.Count; i++)
+                CloseHandle(handles[i]);
         }
 
         public FileSystemHandleMode ParseMode(string mode)
