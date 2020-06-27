@@ -34,7 +34,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
 
         private void Env_DebugHook(object sender, NLua.Event.DebugHookEventArgs e)
         {
-            Root.LogConsole("LUAEXEC: " + e.LuaDebug.CurrentLine + " SRC: " + e.LuaDebug.Name + " IN " + e.LuaDebug.ShortSource);
+            //Root.LogConsole("LUAEXEC: " + e.LuaDebug.CurrentLine + " SRC: " + e.LuaDebug.Name + " IN " + e.LuaDebug.ShortSource);
             if (abort)
             {
                 Lua lState = (Lua)sender;
@@ -46,7 +46,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
         {
             var buffer = ScreenBufferManager.Instance.GetBuffer(0);
             buffer.Begin();
-            buffer.ClearColor = BaseColors.Blue;
+            buffer.BackgroundColor = BaseColors.Blue;
             buffer.Clear();
             Console.ForegroundColor = ConsoleColor.Red;
             string uerr = "Unrecoverable error";
@@ -118,7 +118,9 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
                 {
                     str = "import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.Base.LuaApi.OpenComputers');import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.MachineComponents');local component = require('component');local computer = require('computer');local std = require('stdlib');local unicode = require('unicode');_G['computer'] = computer;_G['component'] = component;_G['unicode'] = unicode;_G['checkArg'] = std.checkArg;_G['dofile'] = nil;_G['loadfile'] = nil;\r\n" + str;
                     var code = env.LoadString(str, chunkName);
-                    return code.Call();
+                    code.Call();
+                    VM.RunningVM.Stop(false);
+                    return null;
                 }
                 catch (Exception ex)
                 {
@@ -131,7 +133,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
                     {
                         var buffer = ScreenBufferManager.Instance.GetBuffer(0);
                         buffer.Begin();
-                        buffer.ClearColor = BaseColors.Black;
+                        buffer.BackgroundColor = BaseColors.Black;
                         buffer.Clear();
                         buffer.End();
                     }
