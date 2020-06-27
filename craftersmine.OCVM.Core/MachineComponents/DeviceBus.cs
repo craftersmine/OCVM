@@ -73,6 +73,14 @@ namespace craftersmine.OCVM.Core.MachineComponents
             else return null;
         }
 
+        public T GetDevice<T>(string address)
+        {
+            var dev = GetDevice(address);
+            if (dev.GetType() == typeof(T))
+                return (T)dev;
+            else return default;
+        }
+
         public IComponent[] GetPrimaryComponents()
         {
             List<IComponent> primaryComps = new List<IComponent>();
