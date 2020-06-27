@@ -21,6 +21,15 @@ namespace craftersmine.OCVM.Core.MachineComponents
 
         }
 
+        public void Reset()
+        {
+            VM.RunningVM.Display.SetDisplaySize(160, 50);
+            var buff = ScreenBufferManager.Instance.GetBuffer(0);
+            buff.BackgroundColor = BaseColors.Black;
+            buff.ForegroundColor = BaseColors.White;
+            ScreenBufferManager.Instance.FreeAllBuffers();
+        }
+
         [LuaCallback(IsDirect = true)]
         public bool isOn()
         {
