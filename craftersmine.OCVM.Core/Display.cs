@@ -190,7 +190,7 @@ namespace craftersmine.OCVM.Core
 
         public void ClearScreenBuffer()
         {
-            ScreenBuffer.Instance.ClearColor = BackColor;
+            ScreenBuffer.Instance.BackgroundColor = BackColor;
             ScreenBuffer.Instance.Clear();
             Redraw();
         }

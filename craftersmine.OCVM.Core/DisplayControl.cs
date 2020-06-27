@@ -85,9 +85,17 @@ namespace craftersmine.OCVM.Core
             CharSize = new SizeF(8f, 16f);
             //CharSize = RazorGFX.MeasureString(" ", Font, 16, new StringFormat(StringFormatFlags.NoFontFallback | StringFormatFlags.DisplayFormatControl));
             Size measuredSize = new Size((int)CharSize.Width * ScreenBuffer.Width, (int)CharSize.Height * ScreenBuffer.Height);
-            Padding = Padding.Empty;
-            Margin = Padding.Empty;
-            ClientSize = measuredSize;
+            if (InvokeRequired)
+                Invoke(new Action(() => {
+                    Padding = Padding.Empty;
+                    Margin = Padding.Empty;
+                    ClientSize = measuredSize;
+                }));
+            else {
+                Padding = Padding.Empty;
+                Margin = Padding.Empty;
+                ClientSize = measuredSize;
+            }
             Redraw();
         }
 
@@ -110,7 +118,8 @@ namespace craftersmine.OCVM.Core
                                     float xPos = CharSize.Width * (float)x;
                                     float yPos = CharSize.Height * (float)y;
                                     var chrRect = new RectangleF(xPos, yPos, CharSize.Width, CharSize.Height);
-                                    g.FillRectangle(new SolidBrush(chr.BackgroundColor), chrRect);
+                                    var b = new SolidBrush(chr.BackgroundColor);
+                                    g.FillRectangle(b, chrRect);
                                     g.DrawString(chr.ToString(), Font, new SolidBrush(chr.ForegroundColor), chrRect.X - 3, chrRect.Y);
                                     if (DrawCharacterCells)
                                         g.DrawRectangle(Pens.Red, chrRect.X, chrRect.Y, chrRect.Width, chrRect.Height);
