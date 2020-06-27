@@ -38,13 +38,16 @@ namespace craftersmine.OCVM.Core.MachineComponents
             foreach(var m in methodsReflect)
             {
                 string methodName = m.Name.Substring(0,1).ToLower() + m.Name.Substring(1);
-                LuaMethodInfo info = new LuaMethodInfo();
-                var attribute = m.GetCustomAttribute<LuaCallbackAttribute>();
-                info.Doc = attribute.Doc;
-                info.IsDirect = attribute.IsDirect;
-                info.IsGetter = attribute.IsGetter;
-                info.IsSetter = attribute.IsSetter;
-                methods.Add(methodName, info);
+                if (!methods.ContainsKey(methodName))
+                {
+                    LuaMethodInfo info = new LuaMethodInfo();
+                    var attribute = m.GetCustomAttribute<LuaCallbackAttribute>();
+                    info.Doc = attribute.Doc;
+                    info.IsDirect = attribute.IsDirect;
+                    info.IsGetter = attribute.IsGetter;
+                    info.IsSetter = attribute.IsSetter;
+                    methods.Add(methodName, info);
+                }
             }
 
             return methods;
@@ -86,6 +89,9 @@ namespace craftersmine.OCVM.Core.MachineComponents
                     {
                         var _params = reflectedMethod.GetParameters();
                         object[] _args = new object[(_params.Length - args.Length) + args.Length];
+                        for (int i = 0; i < _args.Length; i++)
+                            if (_params[i].HasDefaultValue)
+                                _args[i] = _params[i].DefaultValue;
                         for (int i = 0; i < args.Length; i++)
                         {
                             _args[i] = args[i];
