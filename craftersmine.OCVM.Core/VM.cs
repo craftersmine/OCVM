@@ -55,6 +55,11 @@ namespace craftersmine.OCVM.Core
             if (!reboot)
                 SetState(VMState.Stopping);
             else SetState(VMState.Rebooting);
+            var fsms = DeviceBus.GetDevicesByType("filesystem", false);
+            foreach (var fs in fsms)
+            {
+                ((FileSystem)fs).CloseHandles();
+            }
         }
 
         public void SetState(VMState state)
