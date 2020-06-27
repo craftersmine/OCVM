@@ -67,7 +67,8 @@ namespace craftersmine.OCVM.Core.Base
         public DisplayChar[,] Buffer { get; private set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
-        public Color ClearColor { get; set; }
+        public Color BackgroundColor { get; set; }
+        public Color ForegroundColor { get; set; }
         public bool IsChanging { get; set; }
         public static ScreenBuffer Instance { get; private set; }
 
@@ -110,11 +111,14 @@ namespace craftersmine.OCVM.Core.Base
 
         public void Clear()
         {
-            Begin();
+            bool beginCalled = IsChanging;
+            if (!beginCalled)
+                Begin();
             for (int y = 0; y < Height; y++)
                 for (int x = 0; x < Width; x++)
-                    Set(x, y, ' ', BaseColors.White, ClearColor);
-            End();
+                    Set(x, y, ' ', ForegroundColor, BackgroundColor);
+            if (!beginCalled)
+                End();
         }
 
         public void Begin()
@@ -133,19 +137,41 @@ namespace craftersmine.OCVM.Core.Base
         {
             if (IsChanging)
             {
-                Buffer[x, y].SetChar(chr, foreground, background);
+                if ((x >= 0 || x <= Width) && (y >= 0 || y <= Height))
+                    Buffer[x, y].SetChar(chr, foreground, background);
             }
         }
 
-        public DisplayChar[,] End()
+        public void Set(int x, int y, char chr)
         {
+            Set(x, y, chr, ForegroundColor, BackgroundColor);
+        }
+
+        public void End()
+        {
+            IsChanging = false;
             ScreenBufferChanged?.Invoke(this, EventArgs.Empty);
-            return Buffer;
         }
 
         public DisplayChar Get(int x, int y)
         {
             return Buffer[x, y];
+        }
+
+        public void Copy(int x, int y, int width, int height, int tx, int ty)
+        {
+            if (IsChanging)
+            {
+                for (int w = 0; w < width; w++)
+                    for (int h = 0; h < height; h++)
+                    {
+                        if ((w >= 0 || w < Width) && (h >= height || h < Height))
+                        {
+                            if ((tx + x >= 0 || tx + x < Width) && (ty + y >= 0 || ty + y < Height))
+                                Buffer[tx + x + w, ty + y + h] = Buffer[x + w, y + h];
+                        }
+                    }
+            }
         }
 
         public void Scroll()
