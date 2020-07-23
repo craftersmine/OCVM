@@ -15,9 +15,11 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
         public static readonly string PermissionDenied = "access denied";
         public static readonly string UserExists = "user exists";
         public static readonly string NoBootableMediumFound = "no bootable medium found";
-        public static readonly string MachineHalted = "machine halted";
+        public static readonly string MachineHalted = "computer halted";
         public static readonly string InvalidFillValue = "invalid fill value";
         public static readonly string InvalidAddress = "invalid address";
         public static readonly string NotAScreen = "not a screen";
+        public static readonly string InvalidPaletteIndex = "invalid palette index";
+        public static readonly string UnsupportedDepth = "unsupported depth";
     }
 }
