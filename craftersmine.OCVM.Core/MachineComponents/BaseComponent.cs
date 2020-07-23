@@ -78,12 +78,14 @@ namespace craftersmine.OCVM.Core.MachineComponents
     {
         public static object InvokeMethod(this IComponent component, string method, params object[] args)
         {
+            if (component == null)
+                throw new ArgumentNullException(nameof(component));
             Type deviceType = component.GetType();
-            
+
             if (deviceType.IsSubclassOf(typeof(BaseComponent)))
             {
                 var reflectedMethods = deviceType.GetMethods().Where(m => m.GetCustomAttributes(typeof(LuaCallbackAttribute), false).Length > 0).ToArray();
-                foreach(var reflectedMethod in reflectedMethods)
+                foreach (var reflectedMethod in reflectedMethods)
                 {
                     if (reflectedMethod.Name == method)
                     {
@@ -97,7 +99,14 @@ namespace craftersmine.OCVM.Core.MachineComponents
                             _args[i] = args[i];
                         }
 
-                        return reflectedMethod.Invoke(component, _args);
+                        try
+                        {
+                            return reflectedMethod.Invoke(component, _args);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw ex;
+                        }
                     }
                 }
             }
