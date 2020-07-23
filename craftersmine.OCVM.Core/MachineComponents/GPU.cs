@@ -3,6 +3,7 @@ using craftersmine.OCVM.Core.Base;
 using craftersmine.OCVM.Core.Base.LuaApi;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace craftersmine.OCVM.Core.MachineComponents
 {
@@ -21,7 +22,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
             DeviceInfo.Vendor = DeviceInfo.DefaultVendor;
             DeviceInfo.Description = "Virtual Graphics Adapter";
             DeviceInfo.Product = "craftersmine Virtual Graphics Adapter";
-            DeviceInfo.Width = "8/24/32";
+            DeviceInfo.Width = "1/4/8/24/32";
             DeviceInfo.Clock = "2000/2000/2000/2000/2000/2000";
             if (ScreenBufferManager.Instance.GetBuffer(0) == null)
             {
@@ -112,6 +113,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
                     scr.Reset();
                 ScreenAddress = scr.Address;
                 ScreenInstance = scr;
+                VM.RunningVM.Display.SetDisplaySize(Settings.GpuMaxWidth, Settings.GpuMaxHeight);
                 return new object[] { true };
             }
             else
@@ -137,9 +139,101 @@ namespace craftersmine.OCVM.Core.MachineComponents
         }
 
         [LuaCallback(IsDirect = true)]
-        public object[] setBackground()
+        public object[] setBackground(int color, bool isPaletteIndex)
         {
-            return null;
+            var old = ScreenBufferManager.Instance.GetBuffer(0).BackgroundColor;
+            ScreenBufferManager.Instance.GetBuffer(0).BackgroundColor = Color.FromArgb(color);
+            return new object[] { old.ToArgb(), false };
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public object[] getForeground()
+        {
+            return new object[] { ScreenBufferManager.Instance.GetBuffer(0).ForegroundColor.ToArgb(), false };
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public object[] setForeground(int color, bool isPaletteIndex)
+        {
+            var old = ScreenBufferManager.Instance.GetBuffer(0).ForegroundColor;
+            ScreenBufferManager.Instance.GetBuffer(0).ForegroundColor = Color.FromArgb(color);
+            return new object[] { old.ToArgb(), false };
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public object getPaletteColor(int index)
+        {
+            var val = EightBitColorPalette.GetColor(index);
+            if (val == -1)
+                return 0x0;
+            else return OCErrors.InvalidPaletteIndex;
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public object setPaletteColor(int index, int color)
+        {
+            if (index >= 0 || index < 256)
+            {
+                EightBitColorPalette.SetColor(index, color);
+                return EightBitColorPalette.GetColor(index);
+            }
+            else
+            {
+                return OCErrors.InvalidPaletteIndex;
+            }
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public int maxDepth()
+        {
+            if (Settings.CapScreenDepth)
+                return 8;
+            return 32;
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public int getDepth()
+        {
+            if (ScreenInstance == null)
+                return 1;
+            if (Settings.CapScreenDepth)
+                if (ScreenInstance.Depth > 8)
+                    return 8;
+            return ScreenInstance.Depth;
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public bool setDepth(int depth)
+        {
+            switch (depth)
+            {
+                case 1:
+                    ScreenInstance.Depth = 1;
+                    return true;
+                case 4:
+                    ScreenInstance.Depth = 4;
+                    return true;
+                case 8:
+                    ScreenInstance.Depth = 8;
+                    return true;
+                case 16:
+                    ScreenInstance.Depth = 16;
+                    return true;
+                case 24:
+                    ScreenInstance.Depth = 24;
+                    return true;
+                case 32:
+                    ScreenInstance.Depth = 32;
+                    return true;
+            }
+            return false;
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public object[] maxResolution()
+        {
+            var buff = ScreenBufferManager.Instance.GetBuffer(0);
+            return new object[] { buff.Width, buff.Height };
         }
     }
 }
