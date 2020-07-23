@@ -21,6 +21,7 @@ namespace craftersmine.OCVM.GUI
 
         public VMForm(Tier displayTier)
         {
+            Core.Settings.EnableLogging = true;
             InitializeComponent();
             new ScreenBufferManager();
             resetTimer.Interval = 20;
@@ -34,7 +35,7 @@ namespace craftersmine.OCVM.GUI
             VMEvents.DiskActivity += VMEvents_DiskActivity;
             VMEvents.VMReady += VMEvents_VMLaunched;
             VMEvents.VMStateChanged += VMEvents_VMStateChanged;
-            displayControl1.SetTier(Tier.Advanced);
+            //displayControl1.SetTier(Tier.Advanced);
         }
 
         private void Instance_ScreenBufferInitialized(object sender, EventArgs e)
