@@ -9,6 +9,7 @@ using NLua;
 using craftersmine.OCVM.Core.Base.LuaApi;
 using craftersmine.OCVM.Core.Extensions;
 using System.Security;
+using craftersmine.OCVM.Core.Exceptions;
 
 namespace craftersmine.OCVM.Core.MachineComponents
 {
@@ -49,6 +50,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
 
         public void SaveMeta()
         {
+            Logger.Instance.Log(LogEntryType.Info, "Saving filesystem metadata... (" + Address + " | " + FSLabel + ")");
             string[] metadataToRestore = {
                 "version=1",
                 "filesystem.address=" + Address,
@@ -60,6 +62,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
 
         public string RestoreFileSystem()
         {
+            Logger.Instance.Log(LogEntryType.Info, "Restoring filesystem metadata... (" + Address + " | " + FSLabel + ")");
             string[] metadataToRestore = {
                 "version=1",
                 "filesystem.address=" + Address,
@@ -118,6 +121,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
                 }
                 if (isNeededRestore || !isLabelExists)
                 {
+                    Logger.Instance.Log(LogEntryType.Warning, "Restoring corrupted filesystem metadata... (" + Address + " | " + FSLabel + ")");
                     File.WriteAllLines(MetadataFilePath, metadataToRestore);
                     return Address;
                 }
@@ -128,10 +132,13 @@ namespace craftersmine.OCVM.Core.MachineComponents
 
         public static FileSystem MountFileSystem(string hostFolderPath)
         {
+            Logger.Instance.Log(LogEntryType.Info, "Mounting filesystem at \"" + hostFolderPath + "\"...");
             FileSystem fs = new FileSystem(hostFolderPath);
             var restoredAddress = fs.RestoreFileSystem();
             if (!restoredAddress.IsNullEmptyOrWhitespace())
                 fs.Address = restoredAddress;
+            Logger.Instance.Log(LogEntryType.Info, "Mounted filesystem address " + fs.Address);
+            Logger.Instance.Log(LogEntryType.Info, "FS host path: \"" + fs.HostFolderPath + "\"");
             return fs;
         }
 
@@ -156,14 +163,26 @@ namespace craftersmine.OCVM.Core.MachineComponents
                 handle.IsClosed = true;
                 handle.FileStream.Flush();
                 handle.FileStream.Close();
+                Logger.Instance.Log(LogEntryType.Info, "Closed handle " + handle.HandleId);
                 handles.Remove(handle.HandleId);
             }
         }
 
         public void CloseHandles()
         {
+            Logger.Instance.Log(LogEntryType.Info, "Closing filesystem handles...");
             for (int i = 0; i < handles.Count; i++)
-                CloseHandle(handles[i]);
+            {
+                try
+                {
+                    CloseHandle(handles.ElementAt(i).Value);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.Log(LogEntryType.Warning, "Unable to close handle! Is it was closed before?");
+                    Logger.Instance.LogException(LogEntryType.Warning, ex);
+                }
+            }
         }
 
         public FileSystemHandleMode ParseMode(string mode)
@@ -202,6 +221,9 @@ namespace craftersmine.OCVM.Core.MachineComponents
                 FileSystemHandle fsHandle = new FileSystemHandle(GetPath(path), m);
                 fsHandle.HandleId += fsHandle.HostFilePath.GetHashCode();
                 fsHandle.ParentFS = this;
+                if (handles.ContainsKey(fsHandle.HandleId))
+                    fsHandle.HandleId += VM.RunningVM.ExecModule.Random.Next(0x0, 0x7fffff);
+
                 handles.Add(fsHandle.HandleId, fsHandle);
 
                 result[0] = fsHandle;
@@ -217,23 +239,23 @@ namespace craftersmine.OCVM.Core.MachineComponents
         }
 
         [LuaCallback(IsDirect = true)]
-        public object[] read(FileSystemHandle handle, double length)
+        public string read(FileSystemHandle handle, double length)
         {
             if (handle == null)
-                return new object[] { null, OCErrors.BadFileDescriptor };
+                throw new OpenComputersException(OCErrors.BadFileDescriptor); ;
             return handle.read((int)length);
         }
 
         [LuaCallback(IsDirect = true)]
-        public object[] write(FileSystemHandle handle, string data)
+        public bool write(FileSystemHandle handle, string data)
         {
             if (handle == null)
-                return new object[] { null, OCErrors.BadFileDescriptor };
+                throw new OpenComputersException(OCErrors.BadFileDescriptor);
             return handle.write(data);
         }
 
         [LuaCallback(IsDirect = true)]
-        public object[] seek(FileSystemHandle handle, string whence, int offset)
+        public long seek(FileSystemHandle handle, string whence, int offset)
         {
             return handle.seek(whence, offset);
         }
@@ -404,6 +426,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
         internal FileStream FileStream { get; set; }
         internal FileSystem ParentFS { get; set; }
         internal bool IsClosed { get; set; }
+        internal FileSystemHandle HandleInstance { get; set; }
 
         internal FileSystemHandle(string hostFilepath, FileSystemHandleMode mode)
         {
@@ -411,6 +434,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
             Mode = mode;
             HandleId = new Random().Next(100000000, int.MaxValue);
             FileStream = new FileStream(HostFilePath, FileMode.OpenOrCreate, (FileAccess)Mode);
+            HandleInstance = this;
         }
 
         public void close()
@@ -425,13 +449,13 @@ namespace craftersmine.OCVM.Core.MachineComponents
                 ((FileSystemHandle)handle).ParentFS.CloseHandle((FileSystemHandle)handle);
         }
 
-        public object[] read(double length)
+        public string read(double length)
         {
             int len = (int)length;
             if (len == int.MinValue)
                 len = int.MaxValue;
             if (Mode.HasFlag(FileSystemHandleMode.Write) || Mode.HasFlag(FileSystemHandleMode.Append))
-                return new object[] { null, OCErrors.BadFileDescriptor };
+                throw new OpenComputersException(OCErrors.BadFileDescriptor);
             else
             {
                 try
@@ -440,7 +464,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
                         len = Convert.ToInt32(FileStream.Length);
                     string data = "";
                     if (FileStream.Position == FileStream.Length)
-                        return new object[] { null, null };
+                        return null;
                     if (len > FileStream.Length - FileStream.Position)
                         len = (int)FileStream.Length - (int)FileStream.Position;
                     for (int i = 0; i < len; i++)
@@ -448,22 +472,22 @@ namespace craftersmine.OCVM.Core.MachineComponents
                         data += Convert.ToChar((byte)FileStream.ReadByte());
                         VMEvents.OnDiskActivity(ParentFS.Address, DiskActivityType.Read);
                     }
-                    return new object[] { data, null };
+                    return data;
                 }
                 catch (Exception ex)
                 {
                     if (ex is SecurityException || ex is AccessViolationException)
-                        return new object[] { null, OCErrors.PermissionDenied };
+                        throw new OpenComputersException(OCErrors.PermissionDenied);
                     else
-                        return new object[] { null, OCErrors.BadFileDescriptor };
+                        throw new OpenComputersException(OCErrors.BadFileDescriptor);
                 }
             }
         }
 
-        public object[] write(string value)
+        public bool write(string value)
         {
             if (Mode == FileSystemHandleMode.Read)
-                return new object[] { null, OCErrors.BadFileDescriptor };
+                throw new OpenComputersException(OCErrors.BadFileDescriptor);
             else
             {
                 try
@@ -487,24 +511,24 @@ namespace craftersmine.OCVM.Core.MachineComponents
                             VMEvents.OnDiskActivity(ParentFS.Address, DiskActivityType.Write);
                         }
                     }
-                    return new object[] { true, null };
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     if (ex is SecurityException || ex is AccessViolationException)
-                        return new object[] { null, OCErrors.PermissionDenied };
+                        throw new OpenComputersException(OCErrors.PermissionDenied);
                     else
-                        return new object[] { null, OCErrors.BadFileDescriptor };
+                        throw new OpenComputersException(OCErrors.BadFileDescriptor);
                 }
             }
         }
 
-        public object[] seek(string type)
+        public long seek(string type)
         {
             return seek(type, 0);
         }
 
-        public object[] seek(string type, int offset)
+        public long seek(string type, int offset)
         {
             long value = 0;
             type = type.ToLower();
@@ -514,20 +538,20 @@ namespace craftersmine.OCVM.Core.MachineComponents
                 {
                     case "cur":
                         value = FileStream.Seek(offset, SeekOrigin.Current);
-                        return new object[] { value, null };
+                        return value;
                     case "set":
                         value = FileStream.Seek(offset, SeekOrigin.Begin);
-                        return new object[] { value, null };
+                        return value;
                     case "end":
                         value = FileStream.Seek(offset, SeekOrigin.End);
-                        return new object[] { value, null };
+                        return value;
                 }
             }
             catch (Exception ex)
             {
-                return new object[] { null, ex.Message };
+                throw new OpenComputersException(ex.Message);
             }
-            return new object[] { null, OCErrors.BadFileDescriptor };
+            throw new OpenComputersException(OCErrors.BadFileDescriptor);
         }
     }
 
