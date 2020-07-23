@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using craftersmine.OCVM.Core.Base;
 using craftersmine.OCVM.Core.Base.LuaApi.OpenComputers;
 using NLua;
+using NLua.Exceptions;
 
 namespace craftersmine.OCVM.Core.Base.LuaApi
 {
@@ -51,22 +52,22 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             buffer.Begin();
             buffer.BackgroundColor = BaseColors.Blue;
             buffer.Clear();
-            Console.ForegroundColor = ConsoleColor.Red;
             string uerr = "Unrecoverable error";
+            string luaErr = e.Message.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries)[0];
             int xPos1 = (buffer.Width / 2) - (uerr.Length / 2);
             int yPos1 = (buffer.Height / 2) - 3;
             for (int i = 0; i < uerr.Length; i++)
             {
                 buffer.Set(xPos1 + i, yPos1, uerr[i], BaseColors.White, BaseColors.Blue);
             }
-            if (e.Message.Length > buffer.Width)
+            if (luaErr.Length > buffer.Width)
             {
-                for (int i = 0; i <= e.Message.Length / buffer.Width; i++)
+                for (int i = 0; i <= luaErr.Length / buffer.Width; i++)
                 {
                     string tmpStr = "";
-                    if (e.Message.Substring(i * buffer.Width).Length >= buffer.Width)
-                        tmpStr = e.Message.Substring(i * buffer.Width, buffer.Width);
-                    else tmpStr = e.Message.Substring(i * buffer.Width);
+                    if (luaErr.Substring(i * buffer.Width).Length >= buffer.Width)
+                        tmpStr = luaErr.Substring(i * buffer.Width, buffer.Width);
+                    else tmpStr = luaErr.Substring(i * buffer.Width);
                     int xPos2 = (buffer.Width / 2) - (tmpStr.Length / 2);
                     int yPos2 = (buffer.Height / 2) + i;
                     for (int j = 0; j < tmpStr.Length; j++)
@@ -77,18 +78,14 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             }
             else
             {
-                for (int i = 0; i < e.Message.Length; i++)
+                for (int i = 0; i < luaErr.Length; i++)
                 {
-                    int xPos2 = (buffer.Width / 2) - (e.Message.Length / 2);
+                    int xPos2 = (buffer.Width / 2) - (luaErr.Length / 2);
                     int yPos2 = (buffer.Height / 2);
-                    buffer.Set(xPos2 + i, yPos2, e.Message[i], BaseColors.White, BaseColors.Blue);
+                    buffer.Set(xPos2 + i, yPos2, luaErr[i], BaseColors.White, BaseColors.Blue);
                 }
             }
             buffer.End();
-            Console.WriteLine(e.Source);
-            Console.WriteLine(e.Message);
-            //VM.RunningVM.Display.SetColor(BaseColors.Black, BaseColors.White);
-            Console.ResetColor();
         }
 
         public async Task<object[]> ExecuteFile(string path)
