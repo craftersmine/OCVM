@@ -14,8 +14,6 @@ namespace craftersmine.OCVM.Core
 {
     public sealed class DisplayControl : RazorPainterControl
     {
-        private PrivateFontCollection pfc = new PrivateFontCollection();
-
         public int DisplayWidth { get; private set; }
         public int DisplayHeight { get; private set; }
         public SizeF CharSize { get; private set; }
@@ -53,6 +51,7 @@ namespace craftersmine.OCVM.Core
             //ScreenBuffer.CreateScreenBufferInstance();
             ScreenBufferManager.Instance.GetBuffer(0).ScreenBufferChanged += Instance_ScreenBufferChanged;
             ScreenBufferManager.Instance.GetBuffer(0).ScreenBufferCleared += Instance_ScreenBufferCleared;
+            Font = Settings.DisplayFont;
         }
 
         private void Instance_ScreenBufferCleared(object sender, EventArgs e)
@@ -65,15 +64,8 @@ namespace craftersmine.OCVM.Core
             Redraw();
         }
 
-        public void InitializeFont()
-        {
-            pfc.AddFontFile(Path.Combine(Application.StartupPath, "unscii-16-full.ttf"));
-            Font = new Font(pfc.Families[0], 16f, FontStyle.Regular, GraphicsUnit.Pixel);
-        }
-
         public void SetDisplaySize(int width, int height)
         {
-            InitializeFont();
             DisplayWidth = width;
             DisplayHeight = height;
             if (ScreenBufferManager.Instance.GetBuffer(0) == null)
