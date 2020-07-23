@@ -15,6 +15,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
         internal bool IsOn { get; set; }
         internal bool IsPresiseModeEnabled { get; set; }
         internal bool IsTouchModeInverted { get; set; }
+        internal int Depth { get; set; } = 32;
 
         public Screen(Tier tier) : base()
         {
@@ -28,6 +29,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
             buff.BackgroundColor = BaseColors.Black;
             buff.ForegroundColor = BaseColors.White;
             ScreenBufferManager.Instance.FreeAllBuffers();
+            Logger.Instance.Log(LogEntryType.Info, "Screen " + Address + " has been reset! (" + ScreenBufferManager.Instance.GetBuffer(0).Width + "x" + ScreenBufferManager.Instance.GetBuffer(0).Height + "x" + Depth + ")");
         }
 
         [LuaCallback(IsDirect = true)]
