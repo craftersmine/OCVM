@@ -68,11 +68,11 @@ namespace craftersmine.OCVM.Core
         {
             DisplayWidth = width;
             DisplayHeight = height;
-            if (ScreenBufferManager.Instance.GetBuffer(0) == null)
-            {
-                ScreenBufferManager.Instance.CreateBuffer(0, DisplayWidth, DisplayHeight);
-            }
-            ScreenBufferManager.Instance.GetBuffer(0).Initialize(DisplayWidth, DisplayHeight);
+            //if (ScreenBufferManager.Instance.GetBuffer(0) == null)
+            //{
+            //    ScreenBufferManager.Instance.CreateBuffer(0, DisplayWidth, DisplayHeight);
+            //}
+            //ScreenBufferManager.Instance.GetBuffer(0).Initialize(DisplayWidth, DisplayHeight);
             CharSize = RazorGFX.MeasureString(" ", Font);
             CharSize = new SizeF(8f, 16f);
             //CharSize = RazorGFX.MeasureString(" ", Font, 16, new StringFormat(StringFormatFlags.NoFontFallback | StringFormatFlags.DisplayFormatControl));

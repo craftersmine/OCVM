@@ -23,6 +23,11 @@ namespace craftersmine.OCVM.Core.MachineComponents
             DeviceInfo.Product = "craftersmine Virtual Graphics Adapter";
             DeviceInfo.Width = "8/24/32";
             DeviceInfo.Clock = "2000/2000/2000/2000/2000/2000";
+            if (ScreenBufferManager.Instance.GetBuffer(0) == null)
+            {
+                ScreenBufferManager.Instance.CreateBuffer(0, Settings.GpuMaxWidth, Settings.GpuMaxHeight);
+            }
+            ScreenBufferManager.Instance.GetBuffer(0).Initialize(Settings.GpuMaxWidth, Settings.GpuMaxHeight);
         }
 
         [LuaCallback(IsDirect = true)]
