@@ -6,11 +6,11 @@ function computer.address()
 	return Computer.address();
 end
 
-function computer.getBootAddress()
+function computer._getBootAddress()
 	return Computer.getBootAddress();
 end
 
-function computer.setBootAddress(address)
+function computer._setBootAddress(address)
 	if not address then address = ""; end;
 	Computer.setBootAddress(address);
 end

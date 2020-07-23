@@ -16,6 +16,7 @@ function std.checkArg(n, have, ...)
 end
 
 function std.xpcall(f, msgh, ...)
+    breakpoint("xpcall called");
     local handled = false
     checkArg(2, msgh, "function")
     local result = table.pack(xpcall(f, function(...)

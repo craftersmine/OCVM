@@ -8,7 +8,15 @@ end
 
 function component.invoke(address, method, ...)
 	local arg = {...};
-	return Component.invoke(address, method, arg);
+	--local res, reason = pcall(Component.invoke, address, method, arg);
+	--breakpoint(res);
+	--breakpoint(reason);
+	--if not res and reason then
+		--breakpoint(reason)
+	--	error (reason.InnerException.Message, 2);
+	--end
+	local data = Component.invoke(address, method, arg);
+	return data;
 end
 
 function component.list(filter, exact)
