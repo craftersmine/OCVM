@@ -27,6 +27,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             env.UseTraceback = true;
             env.SetDebugHook(KeraLua.LuaHookMask.Line, 0);
             env.DebugHook += Env_DebugHook;
+            env.State.Encoding = Encoding.UTF8;
             env.LoadCLRPackage();
             RegisterGlobals();
             RegisterModules();
