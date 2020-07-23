@@ -19,6 +19,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
 
         private EEPROM(string data, int capacity) : base()
         {
+            Logger.Instance.Log(LogEntryType.Success, "EEPROM successfully loaded!");
             EEPROMCode = data;
             if (DeviceInfo == null)
                 DeviceInfo = new DeviceInfo();
@@ -35,6 +36,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
         {
             if (eepromCode.Length > maxSize)
             {
+                Logger.Instance.Log(LogEntryType.Error, "EEPROM Code exceded size cap of " + maxSize + " bytes!");
                 eeprom = null;
                 return false;
             }
@@ -47,6 +49,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
 
         public static bool LoadEEPROMFromFile(string eepromCodeFile, out EEPROM eeprom)
         {
+            Logger.Instance.Log(LogEntryType.Info, "Loading EEPROM from file \"" + eepromCodeFile + "\"...");
             return LoadEEPROM(File.ReadAllText(eepromCodeFile), out eeprom);
         }
 

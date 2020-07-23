@@ -41,6 +41,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
                     components.Add(component.Address, component);
                     component.Slot = lastSlot;
                     lastSlot++;
+                    Logger.Instance.Log(LogEntryType.Info, "Connected \"" + component.GetDeviceTypeName() + "\" device to VM device bus with address " + component.Address + " to slot " + component.Slot + "!");
                 }
             }
             else throw new ExcededBusLanesException("Max bus lanes on device bus is excedeed " + MaxBusLanes);

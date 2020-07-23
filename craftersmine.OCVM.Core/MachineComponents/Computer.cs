@@ -37,6 +37,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
             }
             else
             {
+                Logger.Instance.Log(LogEntryType.Info, "Added computer user: " + user);
                 users.Add(user);
                 errorMsg = null;
                 return true;
@@ -47,6 +48,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
         {
             if (users.Contains(user))
             {
+                Logger.Instance.Log(LogEntryType.Info, "Removed computer user: " + user);
                 users.Remove(user);
                 return true;
             }

@@ -22,7 +22,9 @@ namespace craftersmine.OCVM.Core.Base
 
         public void CreateBuffer(int index, int width, int height)
         {
+            Logger.Instance.Log(LogEntryType.Info, "[SCRBUFMGR] Creating new screen buffer instance (" + width + "x" + height + ") with index " + index + "...");
             ScreenBuffer buffer = new ScreenBuffer(width, height);
+            Logger.Instance.Log(LogEntryType.Info, "[SCRBUFMGR] Created new screen buffer instance (" + width + "x" + height + ") with index " + index);
             buffers.Add(index, buffer);
         }
 
@@ -32,8 +34,10 @@ namespace craftersmine.OCVM.Core.Base
             {
                 if (buffers[index].IsChanging)
                 {
+                    Logger.Instance.Log(LogEntryType.Info, " [SCRBUFMGR] Ending buffer " + index + " operations before freeing...");
                     buffers[index].End();
                 }
+                Logger.Instance.Log(LogEntryType.Info, " [SCRBUFMGR] Freed buffer " + index);
                 buffers.Remove(index);
                 return true;
             }
@@ -96,6 +100,7 @@ namespace craftersmine.OCVM.Core.Base
 
         public void Initialize(int width, int height)
         {
+            Logger.Instance.Log(LogEntryType.Info, "Initializing new screen buffer instance (" + width + "x" + height + ")...");
             Width = width;
             Height = height;
             Buffer = new DisplayChar[Width, Height];

@@ -36,6 +36,8 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
         private void Env_DebugHook(object sender, NLua.Event.DebugHookEventArgs e)
         {
             //Root.LogConsole("LUAEXEC: " + e.LuaDebug.CurrentLine + " SRC: " + e.LuaDebug.Name + " IN " + e.LuaDebug.ShortSource);
+            if (Settings.EnableLuaLogging)
+                Logger.Instance.Log(LogEntryType.Debug, "EXECLINE: " + e.LuaDebug.CurrentLine + " SRC: " + e.LuaDebug.Name + " IN " + e.LuaDebug.ShortSource, true);
             if (abort)
             {
                 Lua lState = (Lua)sender;
@@ -108,6 +110,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
 
         public void Close()
         {
+            Logger.Instance.Log(LogEntryType.Info, "Closing Lua execution...");
             abort = true;
         }
 
@@ -117,8 +120,10 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             return await Task<object[]>.Run(new Func<object[]>(() => {
                 try
                 {
+                    Logger.Instance.Log(LogEntryType.Info, "Launching VM code...");
                     str = "import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.Base.LuaApi.OpenComputers');import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.MachineComponents');local component = require('component');local computer = require('computer');local std = require('stdlib');local unicode = require('unicode');_G['computer'] = computer;_G['component'] = component;_G['unicode'] = unicode;_G['checkArg'] = std.checkArg;_G['dofile'] = nil;_G['loadfile'] = nil;\r\n" + str;
                     var code = env.LoadString(str, chunkName);
+                    Logger.Instance.Log(LogEntryType.Success, "Machine and EEPROM code loaded! Starting VM...");
                     code.Call();
                     VM.RunningVM.Stop(false);
                     return null;
@@ -127,11 +132,13 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
                 {
                     if (ex.Message.Contains(OCErrors.NoBootableMediumFound))
                     {
+                        Logger.Instance.LogException(LogEntryType.Error, ex);
                         PrintException(ex);
                         SoundGenerator.BeepMorse("--");
                     }
                     else if (ex.Message.Contains(OCErrors.MachineHalted))
                     {
+                        Logger.Instance.Log(LogEntryType.Info, "Machine halted signal received!");
                         var buffer = ScreenBufferManager.Instance.GetBuffer(0);
                         buffer.Begin();
                         buffer.BackgroundColor = BaseColors.Black;
@@ -140,6 +147,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
                     }
                     else
                     {
+                        Logger.Instance.LogException(LogEntryType.Error, ex);
                         PrintException(ex);
                         SoundGenerator.BeepMorse("..-");
                     }
@@ -150,6 +158,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
 
         private void VMEvents_VMStateChanged(object sender, VMStateChangedEventArgs e)
         {
+            Logger.Instance.Log(LogEntryType.Info, "VM state changed to " + e.State.ToString());
             if (e.State == VMState.Stopped || e.State == VMState.Rebooting || e.State == VMState.Stopping)
                 Close();
         }

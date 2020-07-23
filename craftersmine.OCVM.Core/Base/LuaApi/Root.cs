@@ -95,6 +95,9 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
 
         public static void breakpoint(object data)
         {
+            if (data == null)
+                data = "null";
+            Logger.Instance.Log(LogEntryType.Debug, "OCVM Lua breakpoint hit: " + data.ToString());
             print("OCVM_INTERNAL_LUA_BREAKPOINT_HIT: " + data);
         }
 

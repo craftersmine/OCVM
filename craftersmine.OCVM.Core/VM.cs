@@ -29,6 +29,7 @@ namespace craftersmine.OCVM.Core
 
         public void Initialize(DisplayControl display)
         {
+            Logger.Instance.Log(LogEntryType.Info, "Initializing VM with display @" + display.GetHashCode() + " ...");
             ExecutionThread = new Thread(new ThreadStart(ExecuteLuaCode));
             ExecModule = new LuaExecutionModule(0);
             DeviceBus = new DeviceBus(8);
