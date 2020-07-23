@@ -78,6 +78,7 @@
     <Compile Include="Attributes\OpenComputersComponentAttribute.cs" />
     <Compile Include="Base\BaseColors.cs" />
     <Compile Include="Base\DisplayChar.cs" />
+    <Compile Include="Base\DisplayColorFormat.cs" />
     <Compile Include="Base\LuaApi\OCErrors.cs" />
     <Compile Include="Base\LuaApi\OpenComputers\Component.cs" />
     <Compile Include="Base\LuaApi\OpenComputers\Computer.cs" />
@@ -98,9 +99,11 @@
     <Compile Include="Exceptions\EEPROMFailedToLoadException.cs" />
     <Compile Include="Exceptions\ExcededBusLanesException.cs" />
     <Compile Include="Exceptions\InvalidDeviceException.cs" />
+    <Compile Include="Exceptions\OpenComputersException.cs" />
     <Compile Include="Extensions\LuaTableExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="MachineComponents\BaseComponent.cs" />
     <Compile Include="MachineComponents\Computer.cs" />
     <Compile Include="MachineComponents\DeviceBus.cs" />
@@ -115,6 +118,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Settings.cs" />
     <Compile Include="SoundGenerator.cs" />
     <Compile Include="VM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
