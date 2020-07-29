@@ -20,6 +20,13 @@ namespace craftersmine.OCVM.Core.Base
         public ColorDepth Depth { get; set; }
     }
 
+    public static class ColorShiftValues
+    {
+        public const int RedShift = 16;
+        public const int GreenShift = 8;
+        public const int BlueShift = 0;
+    }
+
     public static class EightBitColorPalette
     {
         private static int[] palette = 
@@ -51,6 +58,14 @@ namespace craftersmine.OCVM.Core.Base
             if (index >= 0 || index < 256)
                 return editablePalette[index];
             else return -1;
+        }
+
+        public static Color ExtractColorFromRgb(int color)
+        {
+            int r = (color >> ColorShiftValues.RedShift) & 0xFF;
+            int g = (color >> ColorShiftValues.GreenShift) & 0xFF;
+            int b = (color >> ColorShiftValues.BlueShift) & 0xFF;
+            return Color.FromArgb(r, g, b);
         }
 
         public static void SetColor(int index, int color)
