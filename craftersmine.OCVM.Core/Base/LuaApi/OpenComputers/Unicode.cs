@@ -59,14 +59,31 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
 
         public static string sub(string str, int start)
         {
-            start -= 1;
+            int startI;
+            if (start < 0)
+                startI = str.Length + start;
+            else startI = start - 1;
+            start = Math.Max(0, startI);
+            if (start > str.Length)
+                start = str.Length;
             return str.Substring(start);
         }
 
         public static string sub(string str, int start, int end)
         {
-            start -= 1;
-            return str.Substring(start, end);
+            int startI;
+            if (start < 0)
+                startI = str.Length + start;
+            else startI = start - 1;
+            start = Math.Max(0, startI);
+            int endI;
+            if (end < 0)
+                endI = str.Length + end;
+            else endI = end;
+            end = Math.Min(str.Length, endI);
+            int subStrLen = end - start;
+            string subStr = str.Substring(start, subStrLen);
+            return subStr;
         }
 
         public static string upper(string str)
@@ -81,17 +98,11 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
 
         public static string wtrunc(string str, int count)
         {
-            var bytes = Encoding.UTF8.GetBytes(str);
-            byte[] truncated = new byte[count];
-            if (bytes.Length < count)
+            if (str.Length < count)
                 return "";
             else
             {
-                for (int i = 0; i <= count; i++)
-                {
-                    truncated[i] = bytes[i];
-                }
-                return Encoding.UTF8.GetString(truncated);
+                return str.Substring(0, count - 1);
             }
         }
     }
