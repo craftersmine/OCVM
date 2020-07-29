@@ -64,6 +64,11 @@ namespace craftersmine.OCVM.Core.Base
                 return buffers[index];
             else return null;
         }
+
+        public void BitBlt(int destinationBuffer, int x, int y, int width, int height, int sourceBuffer, int fromX, int fromY)
+        {
+            
+        }
     }
 
     public sealed class ScreenBuffer
@@ -165,18 +170,34 @@ namespace craftersmine.OCVM.Core.Base
 
         public void Copy(int x, int y, int width, int height, int tx, int ty)
         {
+            Begin();
             if (IsChanging)
             {
+                if (width <= 0 || height <= 0) return;
+                if (tx == 0 && ty == 0) return;
+
+                ScreenBuffer copied = new ScreenBuffer(width, height);
+                copied.Begin();
+                for (int dx = 0; dx < width; dx++)
+                    for (int dy = 0; dy < height; dy++)
+                    {
+                        if (x + dx < 0 || y + dy < 0 || x + dx > Width || y + dy > Height)
+                            copied.Set(x + dx, y + dy, ' ', ForegroundColor, BackgroundColor);
+                        else
+                            copied.Set(x + dx, y + dy, Buffer[x + dx, y + dy]);
+                    }
+                copied.End();
+
                 for (int w = 0; w < width; w++)
                     for (int h = 0; h < height; h++)
                     {
-                        if ((w >= 0 || w < Width) && (h >= height || h < Height))
+                        if (tx + w >= 0 && tx + w < Width && ty + h >= 0 && ty + h < Height)
                         {
-                            if ((tx + x >= 0 || tx + x < Width) && (ty + y >= 0 || ty + y < Height))
-                                Buffer[tx + x + w, ty + y + h] = Buffer[x + w, y + h];
+                            Buffer[tx + w, ty + h] = copied.Get(w, h);
                         }
                     }
             }
+            End();
         }
 
         public void Scroll()
