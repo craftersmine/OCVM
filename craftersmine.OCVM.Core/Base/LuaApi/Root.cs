@@ -93,12 +93,26 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             }
         }
 
-        public static void breakpoint(object data)
+        public static void breakpoint(params object[] data)
         {
-            if (data == null)
-                data = "null";
-            Logger.Instance.Log(LogEntryType.Debug, "OCVM Lua breakpoint hit: " + data.ToString());
-            print("OCVM_INTERNAL_LUA_BREAKPOINT_HIT: " + data);
+            if (data.Length > 0)
+            {
+                for(int i = 0; i < data.Length; i++)
+                {
+                    if (data[i] == null)
+                        data[i] = "null";
+                    try
+                    {
+                        Logger.Instance.Log(LogEntryType.Debug, "OCVM Lua breakpoint hit: param " + i + " - " + data[i].ToString());
+                    }
+                    catch
+                    {
+                        Logger.Instance.Log(LogEntryType.Debug, "OCVM Lua breakpoint hit: param " + i + " - Unable to convert to string data");
+                    }
+                }
+            }
+            else Logger.Instance.Log(LogEntryType.Debug, "OCVM Lua breakpoint hit: data is empty");
+            //print("OCVM_INTERNAL_LUA_BREAKPOINT_HIT: " + data);
         }
 
         public static void LogConsole(string data)
