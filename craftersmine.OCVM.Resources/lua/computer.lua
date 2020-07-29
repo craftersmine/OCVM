@@ -54,12 +54,24 @@ function computer.removeUser(user)
 end
 
 function computer.pushSignal(name, ...)
-	Computer.pushSignal(name, {...});
+	--breakpoint("pushed signal " .. tostring(name));
+	--breakpoint({...})
+	--breakpoint(name);
+	Computer.pushSignal(tostring(name), {...});
 end
 
 function computer.pullSignal(timeout)
-	if not timeout and type(timeout) ~= "number" then timeout = 0 end;
-	name, data = Computer.pullSignal(timeout);
+	local deadline = computer.uptime() + (type(timeout) == "number" and timeout or math.huge);
+	repeat
+		local name, sig = Computer.pullSignal();
+		if sig ~= nil and (name ~= nil and type(name) == "string") then
+			packedSig = table.pack(name, table.unpack(sig));
+			--breakpoint(packedSig)
+			if packedSig.n > 0 then
+				return table.unpack(packedSig, 1, packedSig.n);
+			end
+		end
+	until computer.uptime() >= deadline;
 end
 
 function computer.getProgramLocations()

@@ -167,7 +167,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
             computer.PushSignal(name, data);
         }
 
-        public static string pullSignal(int timeout, out LuaTable data)
+        public static string pullSignal(out LuaTable data)
         {
             MachineComponents.Computer computer = VM.RunningVM.DeviceBus.GetPrimaryComponent("computer") as MachineComponents.Computer;
             Signal sig = computer.PullSignal();
