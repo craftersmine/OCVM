@@ -163,7 +163,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
                 handle.IsClosed = true;
                 handle.FileStream.Flush();
                 handle.FileStream.Close();
-                Logger.Instance.Log(LogEntryType.Info, "Closed handle " + handle.HandleId);
+                Logger.Instance.Log(LogEntryType.Info, "Closed handle " + handle.HandleId + " \"" + handle.HostFilePath + "\"");
                 handles.Remove(handle.HandleId);
             }
         }
