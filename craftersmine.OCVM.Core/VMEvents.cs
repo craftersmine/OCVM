@@ -1,6 +1,7 @@
 ﻿using craftersmine.OCVM.Core.MachineComponents;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ namespace craftersmine.OCVM.Core
         public static event EventHandler ScreenStateChanged;
         public static event EventHandler VMReady;
         public static event EventHandler<VMStateChangedEventArgs> VMStateChanged;
+        public static event EventHandler<GpuOperationEventArgs> GpuOperationRequested;
 
         public static void OnVMReady()
         {
@@ -33,6 +35,11 @@ namespace craftersmine.OCVM.Core
         {
             ScreenStateChanged?.Invoke(screen, EventArgs.Empty);
         }
+
+        public static void OnGpuOperationRequested(GPU gpu, GpuOperation operation)
+        {
+            GpuOperationRequested?.Invoke(gpu, new GpuOperationEventArgs() { Operation = operation });
+        }
     }
 
     public sealed class DiskActivityEventArgs : EventArgs
@@ -44,6 +51,18 @@ namespace craftersmine.OCVM.Core
     public sealed class VMStateChangedEventArgs : EventArgs
     {
         public VMState State { get; set; }
+    }
+
+    public sealed class GpuOperationEventArgs : EventArgs
+    {
+        public GpuOperation Operation { get; set; }
+        public Size Viewport { get; set; }
+        public Size Resolution { get; set; }
+    }
+
+    public enum GpuOperation
+    {
+        SetResolution = 1, SetViewport = 2
     }
 
     public enum DiskActivityType
