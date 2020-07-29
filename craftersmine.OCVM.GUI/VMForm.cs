@@ -212,9 +212,9 @@ namespace craftersmine.OCVM.GUI
         {
             if (statusIcons.ContainsKey(iconId))
                 if (statusIcons[iconId].ImageList.ContainsKey(imageId))
-                    if (InvokeRequired)
+                    //if (InvokeRequired)
                         Invoke(new Action(() => { statusIcons[iconId].ToolStripStatusLabel.Image = statusIcons[iconId].ImageList[imageId]; }));
-                    else { statusIcons[iconId].ToolStripStatusLabel.Image = statusIcons[iconId].ImageList[imageId]; }
+                    //else { statusIcons[iconId].ToolStripStatusLabel.Image = statusIcons[iconId].ImageList[imageId]; }
         }
 
         public void PutIcons()
