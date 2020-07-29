@@ -191,9 +191,9 @@ namespace craftersmine.OCVM.Core.Base
                 for (int w = 0; w < width; w++)
                     for (int h = 0; h < height; h++)
                     {
-                        if (tx + w >= 0 && tx + w < Width && ty + h >= 0 && ty + h < Height)
+                        if (x + tx + w >= 0 && x + tx + w < Width && y + ty + h >= 0 && y + ty + h < Height)
                         {
-                            Buffer[tx + w, ty + h] = copied.Get(w, h);
+                            Buffer[x + tx + w, y + ty + h] = copied.Get(w, h);
                         }
                     }
             }

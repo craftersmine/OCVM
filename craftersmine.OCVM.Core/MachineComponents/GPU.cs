@@ -91,9 +91,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
             height -= 1;
             if (buffer != null)
             {
-                buffer.Begin();
                 buffer.Copy((int)x, (int)y, (int)width, (int)height, (int)tx, (int)ty);
-                buffer.End();
                 return true;
             }
             else return false;
