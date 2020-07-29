@@ -78,9 +78,9 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
             computer.PrimaryBootDevice = address;
         }
 
-        public static int uptime()
+        public static double uptime()
         {
-            int uptime = DateTime.Now.Second - VM.RunningVM.LaunchTime.Second;
+            double uptime = (DateTime.Now - VM.RunningVM.LaunchTime).TotalSeconds;
             return uptime;
         }
 
