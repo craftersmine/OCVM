@@ -38,7 +38,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
         {
             //Root.LogConsole("LUAEXEC: " + e.LuaDebug.CurrentLine + " SRC: " + e.LuaDebug.Name + " IN " + e.LuaDebug.ShortSource);
             if (Settings.EnableLuaLogging)
-                Logger.Instance.Log(LogEntryType.Debug, "EXECLINE: " + e.LuaDebug.CurrentLine + " SRC: " + e.LuaDebug.Name + " IN " + e.LuaDebug.ShortSource, true);
+                Logger.Instance.Log(LogEntryType.Debug, "EXECLINE: " + e.LuaDebug.CurrentLine + " SRC: " + e.LuaDebug.Name + " IN " + e.LuaDebug.ShortSource, !Settings.EnableLuaLoggingToFile);
             if (abort)
             {
                 Lua lState = (Lua)sender;
@@ -53,7 +53,9 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             buffer.BackgroundColor = BaseColors.Blue;
             buffer.Clear();
             string uerr = "Unrecoverable error";
-            string luaErr = e.Message.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries)[0];
+            string luaErr = e.Message;
+            if (!Settings.ShowFullErrorMessage)
+                luaErr = e.Message.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries)[0];
             int xPos1 = (buffer.Width / 2) - (uerr.Length / 2);
             int yPos1 = (buffer.Height / 2) - 3;
             for (int i = 0; i < uerr.Length; i++)
@@ -118,7 +120,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
                 try
                 {
                     Logger.Instance.Log(LogEntryType.Info, "Launching VM code...");
-                    str = "import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.Base.LuaApi.OpenComputers');import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.MachineComponents');local component = require('component');local computer = require('computer');local std = require('stdlib');local unicode = require('unicode');_G['computer'] = computer;_G['component'] = component;_G['unicode'] = unicode;_G['checkArg'] = std.checkArg;_G['dofile'] = nil;_G['loadfile'] = nil;\r\n" + str;
+                    str = "import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.Base.LuaApi.OpenComputers');import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.MachineComponents');local component = require('component');local computer = require('computer');local std = require('stdlib');local unicode = require('unicode');_G['computer'] = computer;_G['component'] = component;_G['unicode'] = unicode;_G['checkArg'] = std.checkArg;_G['dofile'] = nil;_G['loadfile'] = nil;io = nil;\r\n" + str;
                     var code = env.LoadString(str, chunkName);
                     Logger.Instance.Log(LogEntryType.Success, "Machine and EEPROM code loaded! Starting VM...");
                     code.Call();
@@ -184,7 +186,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
         public void RegisterGlobals()
         {
             //env.Globals["print"] = (Action<string>)Root.print;
-            env.RegisterFunction("print", typeof(Root).GetMethod("print"));
+            //env.RegisterFunction("print", typeof(Root).GetMethod("print"));
             env.RegisterFunction("breakpoint", typeof(Root).GetMethod("breakpoint"));
             env.RegisterFunction("checkArgType", typeof(Root).GetMethod("checkArgType"));
         }
