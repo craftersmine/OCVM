@@ -1,9 +1,10 @@
 ﻿using craftersmine.OCVM.Core.Attributes;
 using craftersmine.OCVM.Core.Base;
 using craftersmine.OCVM.Core.Base.LuaApi;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
+using craftersmine.OCVM.Core.Exceptions;
+using NLua;
+using System.Diagnostics;
+using System.Linq;
 
 namespace craftersmine.OCVM.Core.MachineComponents
 {
@@ -14,6 +15,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
         public int TotalVram { get; set; }
         public string ScreenAddress { get; set; } = null;
         public Screen ScreenInstance { get; set; } = null;
+        public int ActiveBufferIndex { get; set; } = 0;
 
         public GPU() : base()
         {
@@ -32,10 +34,10 @@ namespace craftersmine.OCVM.Core.MachineComponents
         }
 
         [LuaCallback(IsDirect = true)]
-        public object[] get(int x, int y)
+        public object[] get(long x, long y)
         {
             var data = new object[5];
-            var v = ScreenBufferManager.Instance.GetBuffer(0).Get(x, y);
+            var v = ScreenBufferManager.Instance.GetBuffer(ActiveBufferIndex).Get((int)x, (int)y);
             data[0] = v.Character.ToString();
             data[1] = v.ForegroundColor.ToArgb();
             data[2] = v.BackgroundColor.ToArgb();
@@ -45,15 +47,27 @@ namespace craftersmine.OCVM.Core.MachineComponents
         }
 
         [LuaCallback(IsDirect = true)]
-        public bool set(int x, int y, string value, bool vertical)
+        public bool set(long x, long y, string value, bool vertical)
         {
-            var buffer = ScreenBufferManager.Instance.GetBuffer(0);
+            var buffer = ScreenBufferManager.Instance.GetBuffer(ActiveBufferIndex);
+            x -= 1;
+            y -= 1;
             if (buffer != null)
             {
                 buffer.Begin();
-                for (int i = 0; i < value.Length; i++)
+                if (!vertical)
                 {
-                    buffer.Set(x + i, y, value[i]);
+                    for (int i = 0; i < value.Length; i++)
+                    {
+                        buffer.Set((int)x + i, (int)y, value[i]);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < value.Length; i++)
+                    {
+                        buffer.Set((int)x, (int)y + i, value[i]);
+                    }
                 }
                 buffer.End();
                 return true;
@@ -62,19 +76,23 @@ namespace craftersmine.OCVM.Core.MachineComponents
         }
 
         [LuaCallback(IsDirect = true)]
-        public bool set(int x, int y, string value)
+        public bool set(long x, long y, string value)
         {
             return set(x, y, value, false);
         }
 
         [LuaCallback(IsDirect = true)]
-        public bool copy(int x, int y, int width, int height, int tx, int ty)
+        public bool copy(long x, long y, long width, long height, long tx, long ty)
         {
-            var buffer = ScreenBufferManager.Instance.GetBuffer(0);
+            var buffer = ScreenBufferManager.Instance.GetBuffer(ActiveBufferIndex);
+            x -= 1;
+            y -= 1;
+            width -= 1;
+            height -= 1;
             if (buffer != null)
             {
                 buffer.Begin();
-                buffer.Copy(x, y, width, height, tx, ty);
+                buffer.Copy((int)x, (int)y, (int)width, (int)height, (int)tx, (int)ty);
                 buffer.End();
                 return true;
             }
@@ -82,18 +100,22 @@ namespace craftersmine.OCVM.Core.MachineComponents
         }
 
         [LuaCallback(IsDirect = true)]
-        public object[] fill(int x, int y, int width, int height, string chr)
+        public object[] fill(long x, long y, long width, long height, string chr)
         {
             if (chr.Length > 1)
-                return new object[] { false, OCErrors.InvalidFillValue };
-            var buffer = ScreenBufferManager.Instance.GetBuffer(0);
+                throw new OpenComputersException(OCErrors.InvalidFillValue);
+            var buffer = ScreenBufferManager.Instance.GetBuffer(ActiveBufferIndex);
+            x -= 1;
+            y -= 1;
+            width -= 1;
+            height -= 1;
             if (buffer != null)
             {
                 var c = chr[0];
                 buffer.Begin();
                 for (int x1 = 0; x1 < width; x1++)
                     for (int y1 = 0; y1 < height; y1++)
-                        buffer.Set(x + x1, y + y1, c);
+                        buffer.Set((int)x + x1, (int)y + y1, c);
                 buffer.End();
                 return new object[] { true };
             }
@@ -101,10 +123,10 @@ namespace craftersmine.OCVM.Core.MachineComponents
         }
 
         [LuaCallback(IsDirect = false)]
-        public object[] bind(string address, bool reset = true)
+        public bool bind(string address, bool reset = true)
         {
             if (address == null)
-                return new object[] { false, OCErrors.InvalidAddress };
+                throw new OpenComputersException(OCErrors.InvalidAddress);
 
             var scr = VM.RunningVM.DeviceBus.GetDevice<Screen>(address);
             if (scr != null || scr.GetDeviceTypeName() == "screen")
@@ -113,17 +135,12 @@ namespace craftersmine.OCVM.Core.MachineComponents
                     scr.Reset();
                 ScreenAddress = scr.Address;
                 ScreenInstance = scr;
+                VM.RunningVM.Display.SetViewport(Settings.GpuMaxWidth, Settings.GpuMaxHeight);
                 VM.RunningVM.Display.SetDisplaySize(Settings.GpuMaxWidth, Settings.GpuMaxHeight);
-                return new object[] { true };
+                return true;
             }
             else
-                return new object[] { false, OCErrors.NotAScreen };
-        }
-
-        [LuaCallback(IsDirect = false)]
-        public object[] bind(string address)
-        {
-            return bind(address, true);
+                throw new OpenComputersException(OCErrors.NotAScreen);
         }
 
         [LuaCallback(IsDirect = true)]
@@ -135,47 +152,49 @@ namespace craftersmine.OCVM.Core.MachineComponents
         [LuaCallback(IsDirect = true)]
         public object[] getBackground()
         {
-            return new object[] { ScreenBufferManager.Instance.GetBuffer(0).BackgroundColor.ToArgb(), false };
+            return new object[] { ScreenBufferManager.Instance.GetBuffer(ActiveBufferIndex).BackgroundColor.ToArgb(), false };
         }
 
         [LuaCallback(IsDirect = true)]
-        public object[] setBackground(int color, bool isPaletteIndex)
+        public object[] setBackground(long color, bool isPaletteIndex)
         {
-            var old = ScreenBufferManager.Instance.GetBuffer(0).BackgroundColor;
-            ScreenBufferManager.Instance.GetBuffer(0).BackgroundColor = Color.FromArgb(color);
+            var old = ScreenBufferManager.Instance.GetBuffer(ActiveBufferIndex).BackgroundColor;
+            var col = EightBitColorPalette.ExtractColorFromRgb((int)color);
+            ScreenBufferManager.Instance.GetBuffer(ActiveBufferIndex).BackgroundColor = col;
             return new object[] { old.ToArgb(), false };
         }
 
         [LuaCallback(IsDirect = true)]
         public object[] getForeground()
         {
-            return new object[] { ScreenBufferManager.Instance.GetBuffer(0).ForegroundColor.ToArgb(), false };
+            return new object[] { ScreenBufferManager.Instance.GetBuffer(ActiveBufferIndex).ForegroundColor.ToArgb(), false };
         }
 
         [LuaCallback(IsDirect = true)]
-        public object[] setForeground(int color, bool isPaletteIndex)
+        public object[] setForeground(long color, bool isPaletteIndex)
         {
-            var old = ScreenBufferManager.Instance.GetBuffer(0).ForegroundColor;
-            ScreenBufferManager.Instance.GetBuffer(0).ForegroundColor = Color.FromArgb(color);
+            var old = ScreenBufferManager.Instance.GetBuffer(ActiveBufferIndex).ForegroundColor;
+            var col = EightBitColorPalette.ExtractColorFromRgb((int)color);
+            ScreenBufferManager.Instance.GetBuffer(ActiveBufferIndex).ForegroundColor = col;
             return new object[] { old.ToArgb(), false };
         }
 
         [LuaCallback(IsDirect = true)]
-        public object getPaletteColor(int index)
+        public object getPaletteColor(long index)
         {
-            var val = EightBitColorPalette.GetColor(index);
+            var val = EightBitColorPalette.GetColor((int)index);
             if (val == -1)
                 return 0x0;
             else return OCErrors.InvalidPaletteIndex;
         }
 
         [LuaCallback(IsDirect = true)]
-        public object setPaletteColor(int index, int color)
+        public object setPaletteColor(long index, long color)
         {
             if (index >= 0 || index < 256)
             {
-                EightBitColorPalette.SetColor(index, color);
-                return EightBitColorPalette.GetColor(index);
+                EightBitColorPalette.SetColor((int)index, (int)color);
+                return EightBitColorPalette.GetColor((int)index);
             }
             else
             {
@@ -203,7 +222,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
         }
 
         [LuaCallback(IsDirect = true)]
-        public bool setDepth(int depth)
+        public bool setDepth(long depth)
         {
             switch (depth)
             {
@@ -232,8 +251,118 @@ namespace craftersmine.OCVM.Core.MachineComponents
         [LuaCallback(IsDirect = true)]
         public object[] maxResolution()
         {
-            var buff = ScreenBufferManager.Instance.GetBuffer(0);
+            var buff = ScreenBufferManager.Instance.GetBuffer(ActiveBufferIndex);
+            return new object[] { Settings.GpuMaxWidth, Settings.GpuMaxHeight };
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public object[] getResolution()
+        {
+            var buff = ScreenBufferManager.Instance.GetBuffer(ActiveBufferIndex);
             return new object[] { buff.Width, buff.Height };
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public bool setResolution(long width, long height)
+        {
+            var buff = ScreenBufferManager.Instance.GetBuffer(ActiveBufferIndex);
+            if (buff.Width == width || buff.Height == height)
+                return false;
+            else if (width > Settings.GpuMaxWidth || height > Settings.GpuMaxHeight)
+                throw new OpenComputersException();
+            else
+            {
+                buff.End();
+                buff.Initialize((int)width, (int)height);
+                return true;
+            }
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public object[] getViewport()
+        {
+            return new object[] { VM.RunningVM.Display.Viewport.Width, VM.RunningVM.Display.Viewport.Height };
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public bool setViewport(long width, long height)
+        {
+            int wL = VM.RunningVM.Display.DisplayWidth;
+            int hL = VM.RunningVM.Display.DisplayHeight;
+            if (wL == width || hL == height)
+                return false;
+            else
+            {
+                VM.RunningVM.Display.SetDisplaySize((int)width, (int)height);
+                return true;
+            }
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public int getActiveBuffer()
+        {
+            return ActiveBufferIndex;
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public object[] setActiveBuffer(int newIndex)
+        {
+            int prevIdx = ActiveBufferIndex;
+            if (ScreenBufferManager.Instance.GetAllocatedBuffers().Contains(newIndex))
+            {
+                ActiveBufferIndex = newIndex;
+                return new object[] { prevIdx };
+            }
+            else return new object[] { null, OCErrors.InvalidBufferIndex };
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public LuaTable buffers()
+        {
+            var table = VM.RunningVM.ExecModule.CreateTable();
+            var buffs = ScreenBufferManager.Instance.GetAllocatedBuffers();
+            int i = 1;
+            foreach (var buff in buffs)
+            {
+                if (buff == 0)
+                    continue;
+                else
+                {
+                    table[i] = buff;
+                    i++;
+                }
+            }
+            return table;
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public int allocateBuffer(int width = int.MinValue, int height = int.MinValue)
+        {
+            if (width == int.MinValue)
+                width = Settings.GpuMaxWidth;
+            if (height == int.MinValue)
+                height = Settings.GpuMaxHeight;
+
+            int newBuffIdx = ScreenBufferManager.Instance.AllocatedBuffersCount + 1;
+            ScreenBufferManager.Instance.CreateBuffer(newBuffIdx, width, height);
+            return newBuffIdx;
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public bool freeBuffer(int index = int.MinValue)
+        {
+            if (index == int.MinValue)
+                index = ActiveBufferIndex;
+
+            ActiveBufferIndex = 0;
+            return ScreenBufferManager.Instance.FreeBuffer(index);
+        }
+
+        [LuaCallback(IsDirect = true)]
+        public void freeAllBuffers()
+        {
+            ActiveBufferIndex = 0;
+            ScreenBufferManager.Instance.FreeAllBuffers();
         }
     }
 }
