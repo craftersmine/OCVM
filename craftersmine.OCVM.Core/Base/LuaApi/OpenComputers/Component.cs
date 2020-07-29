@@ -242,7 +242,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
             return table;
         }
 
-        public static bool isAvailable(string componentType)
+        public static bool isAvailable__(string componentType)
         {
             var devices = VM.RunningVM.DeviceBus.GetDevicesByType(componentType, false);
             IComponent primaryDevice = null;
@@ -260,10 +260,10 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
             return false;
         }
 
-        public static LuaTable getPrimary(string componentType)
+        public static LuaTable getPrimary__(string componentType)
         {
             LuaTable table = VM.RunningVM.ExecModule.CreateTable();
-            if (isAvailable(componentType))
+            if (isAvailable__(componentType))
             {
                 var devices = VM.RunningVM.DeviceBus.GetDevicesByType(componentType, false);
                 IComponent primaryDevice = null;
