@@ -86,8 +86,11 @@ namespace craftersmine.OCVM.Core
                     break;
             }
             Console.Write(logLineCtor);
-            LogEntry entry = new LogEntry { Contents = contents, EntryDateTime = _date, Type = prefix };
-            LogEntries.Add(entry);
+            if (!isOnlyConsole)
+            {
+                LogEntry entry = new LogEntry { Contents = contents, EntryDateTime = _date, Type = prefix };
+                LogEntries.Add(entry);
+            }
 #else
             if (prefix != LogEntryType.Debug)
             {
