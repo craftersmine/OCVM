@@ -96,6 +96,7 @@
     <Compile Include="DisplayControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Exceptions\BitBltBufferOperationException.cs" />
     <Compile Include="Exceptions\EEPROMFailedToLoadException.cs" />
     <Compile Include="Exceptions\ExcededBusLanesException.cs" />
     <Compile Include="Exceptions\InvalidDeviceException.cs" />
@@ -112,6 +113,7 @@
     <Compile Include="MachineComponents\FileSystem.cs" />
     <Compile Include="MachineComponents\GPU.cs" />
     <Compile Include="MachineComponents\IComponent.cs" />
+    <Compile Include="MachineComponents\Keyboard.cs" />
     <Compile Include="MachineComponents\Screen.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
