@@ -21,12 +21,26 @@ namespace craftersmine.OCVM.Core
         public bool DrawCharacterCells { get; set; } = false;
         public Tier Tier { get; private set; }
         public ScreenBuffer ScreenBuffer { get { return ScreenBufferManager.Instance.GetBuffer(0); } }
+        public Size Viewport { get; set; } = new Size(50, 16);
 
         public DisplayControl()
         {
             //SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
             VMEvents.VMReady += VMEvents_VMReady;
+            VMEvents.GpuOperationRequested += DisplayControl_OnGpuOperation;
         }
+
+        private void DisplayControl_OnGpuOperation(object sender, GpuOperationEventArgs e)
+        {
+            if (e.Operation == GpuOperation.SetResolution)
+                SetDisplaySize(ScreenBuffer.Width, ScreenBuffer.Height);
+            if (e.Operation == GpuOperation.SetViewport) 
+            {
+                Viewport = e.Viewport;
+                SetDisplaySize(Viewport.Width, Viewport.Height);
+            }
+        }
+
         public void SetTier(Tier tier)
         {
             switch (tier)
@@ -44,6 +58,12 @@ namespace craftersmine.OCVM.Core
                     this.Tier = Tier.Advanced;
                     break;
             }
+        }
+
+        public void SetViewport(int width, int height)
+        {
+            Viewport = new Size(width, height);
+            SetDisplaySize(width, height);
         }
 
         private void VMEvents_VMReady(object sender, EventArgs e)
@@ -76,7 +96,7 @@ namespace craftersmine.OCVM.Core
             CharSize = RazorGFX.MeasureString(" ", Font);
             CharSize = new SizeF(8f, 16f);
             //CharSize = RazorGFX.MeasureString(" ", Font, 16, new StringFormat(StringFormatFlags.NoFontFallback | StringFormatFlags.DisplayFormatControl));
-            Size measuredSize = new Size((int)CharSize.Width * ScreenBuffer.Width, (int)CharSize.Height * ScreenBuffer.Height);
+            Size measuredSize = new Size((int)CharSize.Width * Viewport.Width, (int)CharSize.Height * Viewport.Height);
             if (InvokeRequired)
                 Invoke(new Action(() => {
                     Padding = Padding.Empty;
@@ -102,9 +122,9 @@ namespace craftersmine.OCVM.Core
                         using (var g = Graphics.FromImage(bmp))
                         {
                             g.RenderingOrigin = new Point(0, 0);
-                            for (int x = 0; x < ScreenBuffer.Width; x++)
+                            for (int x = 0; x < Viewport.Width; x++)
                             {
-                                for (int y = 0; y < ScreenBuffer.Height; y++)
+                                for (int y = 0; y < Viewport.Height; y++)
                                 {
                                     var chr = ScreenBuffer.Get(x, y);
                                     float xPos = CharSize.Width * (float)x;
