@@ -9,7 +9,6 @@ function std.checkArg(n, have, ...)
     result = checkArgType(have, ...);
     if not result then
         local msg = string.format("bad argument #%d (%s expected, got %s)", n, table.concat({...}, " or "), have)
-        breakpoint(msg);
         error(msg, 3)
     else return;
     end
