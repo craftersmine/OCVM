@@ -14,14 +14,20 @@ namespace craftersmine.OCVM.Core
     {
         private static bool enableLuaLogging = false; 
         private static PrivateFontCollection pfc = new PrivateFontCollection();
+        private static bool enableLuaLoggingToFile = false;
+
+        public const int GpuMaxWidthConst = 160;
+        public const int GpuMaxHeightConst = 50;
 
         public static bool CapScreenDepth { get; set; }
         public static bool EnableLuaLogging { get { return enableLuaLogging & EnableLogging; } set { enableLuaLogging = value; } }
+        public static bool EnableLuaLoggingToFile { get { return EnableLuaLogging & enableLuaLoggingToFile; } set { enableLuaLoggingToFile = value; } }
         public static bool EnableLogging { get; set; }
+        public static bool ShowFullErrorMessage { get; set; } = true;
 
         public static Font DisplayFont { get; private set; }
-        public static int GpuMaxWidth { get; set; } = 160;
-        public static int GpuMaxHeight { get; set; } = 50;
+        public static int GpuMaxWidth { get; set; } = GpuMaxWidthConst;
+        public static int GpuMaxHeight { get; set; } = GpuMaxHeightConst;
 
         public static void InitializeFont()
         {
