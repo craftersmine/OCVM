@@ -52,7 +52,7 @@ namespace craftersmine.OCVM.GUI
         {
             var buffer = ScreenBufferManager.Instance.GetBuffer(0);
             CreateStatusIcons();
-            buffer.Begin();
+            buffer.Begin(true);
             buffer.BackgroundColor = BaseColors.Black;
             buffer.Clear();
             buffer.End();

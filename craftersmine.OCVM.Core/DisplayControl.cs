@@ -1,4 +1,5 @@
 ﻿using craftersmine.OCVM.Core.Base;
+using craftersmine.OCVM.Core.MachineComponents;
 using RazorGDI;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,13 @@ namespace craftersmine.OCVM.Core
         {
             //SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
             VMEvents.VMReady += VMEvents_VMReady;
+            VMEvents.ScreenBufferUpdate += VMEvents_ScreenBufferUpdate;
             VMEvents.GpuOperationRequested += DisplayControl_OnGpuOperation;
+        }
+
+        private void VMEvents_ScreenBufferUpdate(object sender, ScreenBufferEventArgs e)
+        {
+            DrawCharAt(e.DisplayChar, e.X, e.Y);
         }
 
         private void DisplayControl_OnGpuOperation(object sender, GpuOperationEventArgs e)
@@ -111,6 +118,32 @@ namespace craftersmine.OCVM.Core
             Redraw();
         }
 
+        public void DrawCharAt(DisplayChar chr, int x, int y)
+        {
+            lock (RazorLock)
+            {
+                if (chr != null)
+                {
+                    float xPos = CharSize.Width * (float)x;
+                    float yPos = CharSize.Height * (float)y;
+
+                    var chrRect = new RectangleF(xPos, yPos, CharSize.Width, CharSize.Height);
+                    var bgB = new SolidBrush(chr.BackgroundColor);
+                    var fgB = new SolidBrush(chr.ForegroundColor);
+                    if (chr.Character != (char)0x00000000)
+                    {
+                        RazorGFX.FillRectangle(bgB, chrRect);
+                        RazorGFX.DrawString(chr.Character.ToString(), Font, fgB, chrRect.X - 3, chrRect.Y);
+                    }
+                    else
+                    {
+                        RazorGFX.FillRectangle(bgB, chrRect);
+                    }
+                    RazorPaint();
+                }
+            }
+        }
+
         public void Redraw()
         {
             if (ScreenBuffer != null)
@@ -130,9 +163,17 @@ namespace craftersmine.OCVM.Core
                                     float xPos = CharSize.Width * (float)x;
                                     float yPos = CharSize.Height * (float)y;
                                     var chrRect = new RectangleF(xPos, yPos, CharSize.Width, CharSize.Height);
-                                    var b = new SolidBrush(chr.BackgroundColor);
-                                    g.FillRectangle(b, chrRect);
-                                    g.DrawString(chr.ToString(), Font, new SolidBrush(chr.ForegroundColor), chrRect.X - 3, chrRect.Y);
+                                    if (chr != null)
+                                    {
+                                        var b = new SolidBrush(chr.BackgroundColor);
+                                        g.FillRectangle(b, chrRect);
+                                        g.DrawString(chr.ToString(), Font, new SolidBrush(chr.ForegroundColor), chrRect.X - 3, chrRect.Y);
+                                    }
+                                    else
+                                    {
+                                        var b = new SolidBrush(ScreenBufferManager.Instance.GetBuffer(0).BackgroundColor);
+                                        g.FillRectangle(b, chrRect);
+                                    }
                                     if (DrawCharacterCells)
                                         g.DrawRectangle(Pens.Red, chrRect.X, chrRect.Y, chrRect.Width, chrRect.Height);
                                 }
@@ -143,6 +184,50 @@ namespace craftersmine.OCVM.Core
                     RazorPaint();
                 }
             }
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+
+            char chr = (char)0;
+            if (!e.Shift)
+                chr = ((char)e.KeyValue).ToString().ToLower()[0];
+
+            if (e.Shift)
+                chr = (char)e.KeyValue;
+
+            var ks = new KeyboardSignal(KeyboardSignalType.KeyDown, e.KeyCode, chr);
+
+            if (VM.RunningVM.IsKeyboardAttached)
+            {
+                //VM.RunningVM.KeyboardInstance.SendKeyboardSignal(ks);
+                VM.RunningVM.KeyboardInstance.ProcessKeyEvent(KeyboardSignalType.KeyDown, e.KeyCode, e.Shift, e.Control, e.Alt);
+            }
+        }
+
+        protected override void OnKeyUp(KeyEventArgs e)
+        {
+            base.OnKeyUp(e);
+
+            char chr = (char)0;
+            if (!e.Shift)
+                chr = ((char)e.KeyValue).ToString().ToLower()[0];
+
+            var ks = new KeyboardSignal(KeyboardSignalType.KeyUp, e.KeyCode, chr);
+
+            if (VM.RunningVM.IsKeyboardAttached)
+            {
+                VM.RunningVM.KeyboardInstance.ProcessKeyEvent(KeyboardSignalType.KeyUp, e.KeyCode, e.Shift, e.Control, e.Alt);
+            }
+        }
+
+        protected override void OnKeyPress(KeyPressEventArgs e)
+        {
+            base.OnKeyPress(e);
+
+            char chr = e.KeyChar;
+            Logger.Instance.Log(LogEntryType.Debug, "KeyPress event handled: " + chr);
         }
     }
 }

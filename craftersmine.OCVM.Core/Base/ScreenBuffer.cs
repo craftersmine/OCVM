@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace craftersmine.OCVM.Core.Base
@@ -78,7 +79,8 @@ namespace craftersmine.OCVM.Core.Base
         public int Height { get; private set; }
         public Color BackgroundColor { get; set; }
         public Color ForegroundColor { get; set; }
-        public bool IsChanging { get; set; }
+        public bool IsChanging { get; private set; }
+        public bool IsWaitingToEnd { get; private set; }
         public static ScreenBuffer Instance { get; private set; }
 
         public event EventHandler ScreenBufferChanged;
@@ -123,7 +125,7 @@ namespace craftersmine.OCVM.Core.Base
         {
             bool beginCalled = IsChanging;
             if (!beginCalled)
-                Begin();
+                Begin(true);
             for (int y = 0; y < Height; y++)
                 for (int x = 0; x < Width; x++)
                     Set(x, y, ' ', ForegroundColor, BackgroundColor);
@@ -131,8 +133,9 @@ namespace craftersmine.OCVM.Core.Base
                 End();
         }
 
-        public void Begin()
+        public void Begin(bool waitToEnd)
         {
+            IsWaitingToEnd = waitToEnd;
             if (IsChanging == false)
                 IsChanging = true;
         }
@@ -140,15 +143,24 @@ namespace craftersmine.OCVM.Core.Base
         public void Set(int x, int y, DisplayChar chr)
         {
             if (IsChanging)
-                Buffer[x, y] = chr;
+                if ((x >= 0 && x < Width) && (y >= 0 && y < Height))
+                {
+                    Buffer[x, y] = chr;
+                    if (!IsWaitingToEnd)
+                        VMEvents.OnScreenBufferUpdate(chr, x, y);
+                }
         }
 
         public void Set(int x, int y, char chr, Color foreground, Color background)
         {
             if (IsChanging)
             {
-                if ((x >= 0 || x <= Width) && (y >= 0 || y <= Height))
+                if ((x >= 0 && x < Width) && (y >= 0 && y < Height))
+                {
                     Buffer[x, y].SetChar(chr, foreground, background);
+                    if (!IsWaitingToEnd)
+                        VMEvents.OnScreenBufferUpdate(Buffer[x, y], x, y);
+                }
             }
         }
 
@@ -160,40 +172,42 @@ namespace craftersmine.OCVM.Core.Base
         public void End()
         {
             IsChanging = false;
-            ScreenBufferChanged?.Invoke(this, EventArgs.Empty);
+            if (IsWaitingToEnd)
+                ScreenBufferChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public DisplayChar Get(int x, int y)
         {
-            return Buffer[x, y];
+            if (x >= 0 || x < Width || y >= 0 || y < Height)
+                return Buffer[x, y];
+            return null;
         }
 
         public void Copy(int x, int y, int width, int height, int tx, int ty)
         {
-            Begin();
+            Begin(true);
             if (IsChanging)
             {
                 if (width <= 0 || height <= 0) return;
                 if (tx == 0 && ty == 0) return;
 
-                ScreenBuffer copied = new ScreenBuffer(width, height);
-                copied.Begin();
+                DisplayChar[,] copiedData = new DisplayChar[width, height];
+
                 for (int dx = 0; dx < width; dx++)
                     for (int dy = 0; dy < height; dy++)
                     {
-                        if (x + dx < 0 || y + dy < 0 || x + dx > Width || y + dy > Height)
-                            copied.Set(x + dx, y + dy, ' ', ForegroundColor, BackgroundColor);
+                        if (x + dx < 0 || y + dy < 0 || x + dx >= Width || y + dy >= Height)
+                            copiedData[dx, dy] = new DisplayChar(' ', ForegroundColor, BackgroundColor);
                         else
-                            copied.Set(x + dx, y + dy, Buffer[x + dx, y + dy]);
+                            copiedData[dx, dy] = Get(x + dx, y + dy);
                     }
-                copied.End();
 
                 for (int w = 0; w < width; w++)
                     for (int h = 0; h < height; h++)
                     {
                         if (x + tx + w >= 0 && x + tx + w < Width && y + ty + h >= 0 && y + ty + h < Height)
                         {
-                            Buffer[x + tx + w, y + ty + h] = copied.Get(w, h);
+                            Buffer[x + tx + w, y + ty + h] = copiedData[w, h];
                         }
                     }
             }
@@ -202,7 +216,7 @@ namespace craftersmine.OCVM.Core.Base
 
         public void Scroll()
         {
-            Begin();
+            Begin(true);
             for (int y = 1; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)

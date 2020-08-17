@@ -49,7 +49,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
         private void PrintException(Exception e)
         {
             var buffer = ScreenBufferManager.Instance.GetBuffer(0);
-            buffer.Begin();
+            buffer.Begin(true);
             buffer.BackgroundColor = BaseColors.Blue;
             buffer.Clear();
             string uerr = "Unrecoverable error";
@@ -139,7 +139,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
                     {
                         Logger.Instance.Log(LogEntryType.Info, "Machine halted signal received!");
                         var buffer = ScreenBufferManager.Instance.GetBuffer(0);
-                        buffer.Begin();
+                        buffer.Begin(true);
                         buffer.BackgroundColor = BaseColors.Black;
                         buffer.Clear();
                         buffer.End();

@@ -54,7 +54,7 @@ namespace craftersmine.OCVM.Core.MachineComponents
             y -= 1;
             if (buffer != null)
             {
-                buffer.Begin();
+                buffer.Begin(false);
                 if (!vertical)
                 {
                     for (int i = 0; i < value.Length; i++)
@@ -87,8 +87,6 @@ namespace craftersmine.OCVM.Core.MachineComponents
             var buffer = ScreenBufferManager.Instance.GetBuffer(ActiveBufferIndex);
             x -= 1;
             y -= 1;
-            width -= 1;
-            height -= 1;
             if (buffer != null)
             {
                 buffer.Copy((int)x, (int)y, (int)width, (int)height, (int)tx, (int)ty);
@@ -105,12 +103,10 @@ namespace craftersmine.OCVM.Core.MachineComponents
             var buffer = ScreenBufferManager.Instance.GetBuffer(ActiveBufferIndex);
             x -= 1;
             y -= 1;
-            width -= 1;
-            height -= 1;
             if (buffer != null)
             {
                 var c = chr[0];
-                buffer.Begin();
+                buffer.Begin(true);
                 for (int x1 = 0; x1 < width; x1++)
                     for (int y1 = 0; y1 < height; y1++)
                         buffer.Set((int)x + x1, (int)y + y1, c);
