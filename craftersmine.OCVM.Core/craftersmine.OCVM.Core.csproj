@@ -79,6 +79,7 @@
     <Compile Include="Base\BaseColors.cs" />
     <Compile Include="Base\DisplayChar.cs" />
     <Compile Include="Base\DisplayColorFormat.cs" />
+    <Compile Include="Base\KeyCodes.cs" />
     <Compile Include="Base\LuaApi\OCErrors.cs" />
     <Compile Include="Base\LuaApi\OpenComputers\Component.cs" />
     <Compile Include="Base\LuaApi\OpenComputers\Computer.cs" />
