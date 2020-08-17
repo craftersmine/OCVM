@@ -77,17 +77,22 @@ namespace craftersmine.OCVM.Core.MachineComponents
             }
         }
 
+        public void PushSignal(string name, params object[] data)
+        {
+            signalQueue.Enqueue(new Signal(name, data));
+        }
+
         public Signal PullSignal()
         {
             if (signalQueue.Count > 0)
             {
                 var signal = signalQueue.Dequeue();
                 Logger.Instance.Log(LogEntryType.Info, "Pulled computer signal: " + signal.Name);
-                foreach (var val in signal.Data.Values)
+                foreach (var val in signal.Data)
                 {
                     try
                     {
-                        Logger.Instance.Log(LogEntryType.Info, "Signal data value: " + val, true);
+                        Logger.Instance.Log(LogEntryType.Info, "Signal data value: " + val.ToString(), true);
                     }
                     catch
                     {
@@ -103,10 +108,10 @@ namespace craftersmine.OCVM.Core.MachineComponents
     public sealed class Signal
     {
         public string Name { get; set; }
-        public LuaTable Data { get; set; }
+        public object[] Data { get; set; }
 
         private Signal() { }
-        public Signal(string name, LuaTable data)
+        public Signal(string name, params object[] data)
         {
             Name = name; Data = data;
         }
