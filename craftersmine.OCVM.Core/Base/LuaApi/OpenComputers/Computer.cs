@@ -164,7 +164,7 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
         public static void pushSignal(string name, LuaTable data)
         {
             MachineComponents.Computer computer = VM.RunningVM.DeviceBus.GetPrimaryComponent("computer") as MachineComponents.Computer;
-            computer.PushSignal(name, data);
+            computer.PushSignal(name, data.GetValuesAsArray());
         }
 
         public static string pullSignal(out LuaTable data)
@@ -173,7 +173,14 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
             Signal sig = computer.PullSignal();
             if (sig != null)
             {
-                data = sig.Data;
+                var tbl = VM.RunningVM.ExecModule.CreateTable();
+                int count = 1;
+                foreach(var val in sig.Data)
+                {
+                    tbl[count] = val;
+                    count++;
+                }
+                data = tbl;
                 return sig.Name;
             }
             else
