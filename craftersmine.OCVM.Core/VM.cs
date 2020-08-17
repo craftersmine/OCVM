@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Threading;
 using craftersmine.OCVM.Core.Base;
 using craftersmine.OCVM.Core.Exceptions;
+using NLua;
 
 namespace craftersmine.OCVM.Core
 {
@@ -26,6 +27,9 @@ namespace craftersmine.OCVM.Core
         public DateTime LaunchTime { get; private set; }
         public VMState State { get; private set; }
         public ScreenBuffer ScreenBuffer { get; set; }
+        public Computer ComputerInstance { get; private set; }
+        public Keyboard KeyboardInstance { get; private set; }
+        public bool IsKeyboardAttached { get; internal set; } = false;
 
         public void Initialize(DisplayControl display)
         {
@@ -34,10 +38,15 @@ namespace craftersmine.OCVM.Core
             ExecModule = new LuaExecutionModule(0);
             DeviceBus = new DeviceBus(8);
             Display = display;
-            DeviceBus.ConnectDevice(new Computer(Guid.NewGuid().ToString()));
+            ComputerInstance = new Computer(Guid.NewGuid().ToString());
+            KeyboardInstance = new Keyboard();
+            DeviceBus.ConnectDevice(ComputerInstance);
             DeviceBus.ConnectDevice(FileSystem.MountFileSystem("D:\\OCVMDrives\\c\\"));
+            //DeviceBus.ConnectDevice(FileSystem.MountFileSystem("D:\\OCVMDrives\\d\\"));
             DeviceBus.ConnectDevice(new Screen(display.Tier));
-            DeviceBus.ConnectDevice(new GPU() { Address = Guid.Empty.ToString() });
+            DeviceBus.ConnectDevice(new GPU());
+            DeviceBus.ConnectDevice(KeyboardInstance);
+            IsKeyboardAttached = true;
             if (EEPROM.LoadEEPROMFromFile("LuaBios.lua", out EEPROM eeprom))
             {
                 DeviceBus.ConnectDevice(eeprom);
@@ -63,6 +72,7 @@ namespace craftersmine.OCVM.Core
             {
                 ((FileSystem)fs).CloseHandles();
             }
+            ((Keyboard)DeviceBus.GetPrimaryComponent("keyboard")).UninstallHook();
         }
 
         public void SetState(VMState state)
