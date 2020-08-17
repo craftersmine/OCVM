@@ -467,11 +467,15 @@ namespace craftersmine.OCVM.Core.MachineComponents
                         return null;
                     if (len > FileStream.Length - FileStream.Position)
                         len = (int)FileStream.Length - (int)FileStream.Position;
-                    for (int i = 0; i < len; i++)
-                    {
-                        data += Convert.ToChar((byte)FileStream.ReadByte());
-                        VMEvents.OnDiskActivity(ParentFS.Address, DiskActivityType.Read);
-                    }
+                    VMEvents.OnDiskActivity(ParentFS.Address, DiskActivityType.Read);
+                    byte[] readBuff = new byte[len];
+                    int r = FileStream.Read(readBuff, 0, len);
+                    data = Encoding.Default.GetString(readBuff);
+                    //for (int i = 0; i < len; i++)
+                    //{
+                    //    data += Convert.ToChar((byte)FileStream.ReadByte());
+                    //    VMEvents.OnDiskActivity(ParentFS.Address, DiskActivityType.Read);
+                    //}
                     return data;
                 }
                 catch (Exception ex)
