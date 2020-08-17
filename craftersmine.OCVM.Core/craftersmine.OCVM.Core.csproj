@@ -73,6 +73,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="WinputManager">
+      <HintPath>..\craftersmine.OCVM.Resources\WinputManager.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\OpenComputersComponentAttribute.cs" />
