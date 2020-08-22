@@ -90,69 +90,50 @@ namespace craftersmine.OCVM.Core.Base.LuaApi
             buffer.End();
         }
 
-        public async Task<object[]> ExecuteFile(string path)
-        {
-            //env.Options.ScriptLoader = new FileSystemScriptLoader() { IgnoreLuaPathGlobal = true, ModulePaths = new string[] { Path.GetDirectoryName(path) } };
-            //await env.DoFileAsync(path);
-            return await Task<object[]>.Run(new Func<object[]>(() => {
-                try
-                {
-                    return env.DoFile(path);
-                }
-                catch (Exception ex)
-                {
-                    PrintException(ex);
-                    return null;
-                }
-            }));
-        }
-
         public void Close()
         {
             Logger.Instance.Log(LogEntryType.Info, "Closing Lua execution...");
             abort = true;
         }
 
-        public async Task<object[]> ExecuteString(string str, string chunkName = "mainChunk")
+        public void ExecuteString(string str, string chunkName = "mainChunk")
         {
             VMEvents.VMStateChanged += VMEvents_VMStateChanged;
-            return await Task<object[]>.Run(new Func<object[]>(() => {
-                try
+            try
+            {
+                Logger.Instance.Log(LogEntryType.Info, "Launching VM code...");
+                str = "import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.Base.LuaApi.OpenComputers');import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.MachineComponents');local component = require('component');local computer = require('computer');local std = require('stdlib');local unicode = require('unicode');_G['computer'] = computer;_G['component'] = component;_G['unicode'] = unicode;_G['checkArg'] = std.checkArg;_G['dofile'] = nil;_G['loadfile'] = nil;io = nil;\r\n" + str;
+                var code = env.LoadString(str, chunkName);
+                Logger.Instance.Log(LogEntryType.Success, "Machine and EEPROM code loaded! Starting VM...");
+                code.Call();
+                VM.RunningVM.Stop(false);
+                return;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains(OCErrors.NoBootableMediumFound))
                 {
-                    Logger.Instance.Log(LogEntryType.Info, "Launching VM code...");
-                    str = "import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.Base.LuaApi.OpenComputers');import('craftersmine.OCVM.Core', 'craftersmine.OCVM.Core.MachineComponents');local component = require('component');local computer = require('computer');local std = require('stdlib');local unicode = require('unicode');_G['computer'] = computer;_G['component'] = component;_G['unicode'] = unicode;_G['checkArg'] = std.checkArg;_G['dofile'] = nil;_G['loadfile'] = nil;io = nil;\r\n" + str;
-                    var code = env.LoadString(str, chunkName);
-                    Logger.Instance.Log(LogEntryType.Success, "Machine and EEPROM code loaded! Starting VM...");
-                    code.Call();
-                    VM.RunningVM.Stop(false);
-                    return null;
+                    Logger.Instance.LogException(LogEntryType.Error, ex);
+                    PrintException(ex);
+                    SoundGenerator.BeepMorse("--");
                 }
-                catch (Exception ex)
+                else if (ex.Message.Contains(OCErrors.MachineHalted))
                 {
-                    if (ex.Message.Contains(OCErrors.NoBootableMediumFound))
-                    {
-                        Logger.Instance.LogException(LogEntryType.Error, ex);
-                        PrintException(ex);
-                        SoundGenerator.BeepMorse("--");
-                    }
-                    else if (ex.Message.Contains(OCErrors.MachineHalted))
-                    {
-                        Logger.Instance.Log(LogEntryType.Info, "Machine halted signal received!");
-                        var buffer = ScreenBufferManager.Instance.GetBuffer(0);
-                        buffer.Begin(true);
-                        buffer.BackgroundColor = BaseColors.Black;
-                        buffer.Clear();
-                        buffer.End();
-                    }
-                    else
-                    {
-                        Logger.Instance.LogException(LogEntryType.Error, ex);
-                        PrintException(ex);
-                        SoundGenerator.BeepMorse("..-");
-                    }
-                    return null;
+                    Logger.Instance.Log(LogEntryType.Info, "Machine halted signal received!");
+                    var buffer = ScreenBufferManager.Instance.GetBuffer(0);
+                    buffer.Begin(true);
+                    buffer.BackgroundColor = BaseColors.Black;
+                    buffer.Clear();
+                    buffer.End();
                 }
-            }));
+                else
+                {
+                    Logger.Instance.LogException(LogEntryType.Error, ex);
+                    PrintException(ex);
+                    SoundGenerator.BeepMorse("..-");
+                }
+                return;
+            }
         }
 
         private void VMEvents_VMStateChanged(object sender, VMStateChangedEventArgs e)
