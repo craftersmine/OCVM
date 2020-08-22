@@ -99,12 +99,6 @@ namespace craftersmine.OCVM.Core.Base.LuaApi.OpenComputers
         public static string wtrunc(string str, int count)
         {
             return str;
-            if (str.Length < count)
-                return "";
-            else
-            {
-                return str.Substring(0, count - 1);
-            }
         }
     }
 }
