@@ -23,6 +23,7 @@ namespace craftersmine.OCVM.Core
         public static bool EnableLuaLogging { get { return enableLuaLogging & EnableLogging; } set { enableLuaLogging = value; } }
         public static bool EnableLuaLoggingToFile { get { return EnableLuaLogging & enableLuaLoggingToFile; } set { enableLuaLoggingToFile = value; } }
         public static bool EnableLogging { get; set; }
+        public static bool EnableLoggingSignals { get; set; } = false;
         public static bool ShowFullErrorMessage { get; set; } = true;
 
         public static Font DisplayFont { get; private set; }

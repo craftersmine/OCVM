@@ -63,16 +63,19 @@ namespace craftersmine.OCVM.Core.MachineComponents
         public void PushSignal(string name, LuaTable data)
         {
             signalQueue.Enqueue(new Signal(name, data));
-            Logger.Instance.Log(LogEntryType.Info, "Pushed computer signal: " + name, true);
-            foreach (var val in data.Values)
+            if (Settings.EnableLoggingSignals)
             {
-                try
+                Logger.Instance.Log(LogEntryType.Info, "Pushed computer signal: " + name, true);
+                foreach (var val in data.Values)
                 {
-                    Logger.Instance.Log(LogEntryType.Info, "Signal data value: " + val, true);
-                }
-                catch
-                {
-                    Logger.Instance.Log(LogEntryType.Warning, "Unable to convert signal data value to string!", true);
+                    try
+                    {
+                        Logger.Instance.Log(LogEntryType.Info, "Signal data value: " + val, true);
+                    }
+                    catch
+                    {
+                        Logger.Instance.Log(LogEntryType.Warning, "Unable to convert signal data value to string!", true);
+                    }
                 }
             }
         }
@@ -87,16 +90,19 @@ namespace craftersmine.OCVM.Core.MachineComponents
             if (signalQueue.Count > 0)
             {
                 var signal = signalQueue.Dequeue();
-                Logger.Instance.Log(LogEntryType.Info, "Pulled computer signal: " + signal.Name);
-                foreach (var val in signal.Data)
+                if (Settings.EnableLoggingSignals)
                 {
-                    try
+                    Logger.Instance.Log(LogEntryType.Info, "Pulled computer signal: " + signal.Name);
+                    foreach (var val in signal.Data)
                     {
-                        Logger.Instance.Log(LogEntryType.Info, "Signal data value: " + val.ToString(), true);
-                    }
-                    catch
-                    {
-                        Logger.Instance.Log(LogEntryType.Warning, "Unable to convert signal data value to string!", true);
+                        try
+                        {
+                            Logger.Instance.Log(LogEntryType.Info, "Signal data value: " + val.ToString(), true);
+                        }
+                        catch
+                        {
+                            Logger.Instance.Log(LogEntryType.Warning, "Unable to convert signal data value to string!", true);
+                        }
                     }
                 }
                 return signal;
