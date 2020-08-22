@@ -410,7 +410,9 @@ namespace craftersmine.OCVM.Core.MachineComponents
         public long size(string path)
         {
             if (exists(path))
-                return new FileInfo(GetPath(path)).Length;
+                if (!isDirectory(path))
+                    return new FileInfo(GetPath(path)).Length;
+                else return 0;
             else return 0;
         }
 
