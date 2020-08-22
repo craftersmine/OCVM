@@ -63,7 +63,15 @@ namespace craftersmine.OCVM.Core
             string logLineCtor = _date + " [" + prefix.ToString().ToUpper() + "]" + " " + contents + "\r\n";
 #if DEBUG
             if (!isOnlyConsole && Settings.EnableLogging)
-                File.AppendAllText(_file, logLineCtor);
+                try
+                {
+                    File.AppendAllText(_file, logLineCtor);
+                }
+                catch (Exception ex)
+                {
+                    Log(LogEntryType.Warning, "Unable to log data to file!", true);
+                    LogException(LogEntryType.Warning, ex, true);
+                }
             switch (prefix)
             {
                 default:
