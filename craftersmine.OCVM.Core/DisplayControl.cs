@@ -77,7 +77,6 @@ namespace craftersmine.OCVM.Core
         {
             //ScreenBuffer.CreateScreenBufferInstance();
             ScreenBufferManager.Instance.GetBuffer(0).ScreenBufferChanged += Instance_ScreenBufferChanged;
-            ScreenBufferManager.Instance.GetBuffer(0).ScreenBufferCleared += Instance_ScreenBufferCleared;
             Font = Settings.DisplayFont;
         }
 
@@ -197,7 +196,7 @@ namespace craftersmine.OCVM.Core
             if (e.Shift)
                 chr = (char)e.KeyValue;
 
-            var ks = new KeyboardSignal(KeyboardSignalType.KeyDown, e.KeyCode, chr);
+            //var ks = new KeyboardSignal(KeyboardSignalType.KeyDown, e.KeyCode, chr);
 
             if (VM.RunningVM.IsKeyboardAttached)
             {
@@ -214,20 +213,12 @@ namespace craftersmine.OCVM.Core
             if (!e.Shift)
                 chr = ((char)e.KeyValue).ToString().ToLower()[0];
 
-            var ks = new KeyboardSignal(KeyboardSignalType.KeyUp, e.KeyCode, chr);
+            //var ks = new KeyboardSignal(KeyboardSignalType.KeyUp, e.KeyCode, chr);
 
             if (VM.RunningVM.IsKeyboardAttached)
             {
                 VM.RunningVM.KeyboardInstance.ProcessKeyEvent(KeyboardSignalType.KeyUp, e.KeyCode, e.Shift, e.Control, e.Alt);
             }
-        }
-
-        protected override void OnKeyPress(KeyPressEventArgs e)
-        {
-            base.OnKeyPress(e);
-
-            char chr = e.KeyChar;
-            Logger.Instance.Log(LogEntryType.Debug, "KeyPress event handled: " + chr);
         }
     }
 }
