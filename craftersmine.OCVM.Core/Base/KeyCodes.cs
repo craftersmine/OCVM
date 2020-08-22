@@ -24,14 +24,14 @@ namespace craftersmine.OCVM.Core.Base
         Colon = 0x92, Comma = 0x33, Equals = 0x0D, Grave = 0x29,
         LBracket = 0x1A, Minus = 0x0C, Period = 0x34,
         RBracket = 0x1B, Semicolon = 0x27, Slash = 0x27,
-        Space = 0x39, Tab = 0x0F, Circumflex = 0x90,
+        Space = 0x39, Tab = 0x0F, Circumflex = 0x90, Underline = 0x93,
 
         // Modifier and special keys
         Backspace = 0x0E, CapsLock = 0x3A, Enter = 0x1C,
         LAlt = 0x38, LShift = 0x2A, LControl = 0x1D,
         RAlt = 0xB8, RShift = 0x36, RControl = 0x9D,
         NumLock = 0x45, Pause = 0xC5, ScrollLock = 0x46,
-        Stop = 0x95, Underline = 0x93, NoKey = 0x1FFFFFFF,
+        Stop = 0x95, NoKey = 0x1FFFFFFF,
 
         // Additional keypad keys
         Up = 0xC8, Down = 0xD0, Left = 0xCB, Right = 0xCD,
