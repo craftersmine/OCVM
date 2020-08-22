@@ -119,6 +119,7 @@
     <Compile Include="MachineComponents\IComponent.cs" />
     <Compile Include="MachineComponents\Keyboard.cs" />
     <Compile Include="MachineComponents\Screen.cs" />
+    <Compile Include="Native\KeyboardInputProcessor.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
