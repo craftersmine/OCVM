@@ -124,8 +124,6 @@ namespace craftersmine.OCVM.GUI
             //this.Size = display1.ClientSize;
         }
 
-        Tier t = Tier.Base;
-
         private void Button1_Click(object sender, EventArgs e)
         {
             //switch (t)
@@ -144,9 +142,6 @@ namespace craftersmine.OCVM.GUI
             //        break;
             //}
         }
-
-        int curPosX = 0;
-        int curPosY = 0;
 
         private void VMForm_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -196,7 +191,6 @@ namespace craftersmine.OCVM.GUI
             VM.RunningVM.Stop(false);
         }
 
-        int count = 0;
 
         private void Configure_Click(object sender, EventArgs e)
         {
