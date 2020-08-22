@@ -84,7 +84,6 @@ namespace craftersmine.OCVM.Core.Base
         public static ScreenBuffer Instance { get; private set; }
 
         public event EventHandler ScreenBufferChanged;
-        public event EventHandler ScreenBufferCleared;
         public event EventHandler ScreenBufferInitialized;
 
         private ScreenBuffer()
